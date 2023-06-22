@@ -8,9 +8,10 @@ import {
   TextInput,
   Pressable,
   Text,
+  KeyboardAvoidingView,
   // Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -38,7 +39,7 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView style={styles.container}>
       <View style={styles.main}>
         <View style={styles.image}>
           <Image
@@ -133,7 +134,7 @@ export default function Login() {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

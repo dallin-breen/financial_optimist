@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+// import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TextInput,
   Pressable,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 
 export default function CreateAccount() {
@@ -84,7 +85,7 @@ export default function CreateAccount() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView style={styles.container}>
       <View style={styles.main}>
         <View style={styles.form}>
           <View style={styles.inputs}>
@@ -210,7 +211,7 @@ export default function CreateAccount() {
           </Pressable>
         </View>
       </View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
