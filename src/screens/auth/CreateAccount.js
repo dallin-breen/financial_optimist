@@ -10,6 +10,9 @@ import {
   Alert,
   KeyboardAvoidingView,
 } from "react-native";
+import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { addDoc, collection } from "firebase/firestore";
 
 export default function CreateAccount() {
   const [name, setName] = useState("");
@@ -17,6 +20,8 @@ export default function CreateAccount() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [budget, setBudget] = useState("$ 0.00");
+  const auth = FIREBASE_AUTH;
+  const db = FIRESTORE_DB;
 
   function setUserName(text) {
     setName(text);
@@ -40,7 +45,7 @@ export default function CreateAccount() {
     setBudget(valueWithSign);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (name === "") {
       Alert.alert("Error", "Please enter your full name");
       return;
@@ -81,7 +86,28 @@ export default function CreateAccount() {
       Alert.alert("Error", "Please enter your budget with the correct form");
       return;
     }
-    console.log("Submitted!");
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      await updateProfile(user, {
+        displayName: name,
+      });
+
+      await addDoc(collection(db, "budgets"), {
+        userId: user.uid,
+        budget: budget,
+      });
+
+      console.log(user);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
