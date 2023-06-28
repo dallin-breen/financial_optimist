@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 export default function CreateAccount() {
   const [name, setName] = useState("");
@@ -99,8 +99,7 @@ export default function CreateAccount() {
         displayName: name,
       });
 
-      await addDoc(collection(db, "budgets"), {
-        userId: user.uid,
+      await setDoc(doc(db, "users", `${user.uid}`), {
         budget: budget,
       });
 
