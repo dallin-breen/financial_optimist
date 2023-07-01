@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from "react";
 // import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -9,6 +10,7 @@ import {
   Pressable,
   Alert,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
@@ -22,6 +24,8 @@ export default function CreateAccount() {
   const [budget, setBudget] = useState("$ 0.00");
   const auth = FIREBASE_AUTH;
   const db = FIRESTORE_DB;
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   function setUserName(text) {
     setName(text);
@@ -88,6 +92,7 @@ export default function CreateAccount() {
     }
 
     try {
+      setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -99,14 +104,27 @@ export default function CreateAccount() {
         displayName: name,
       });
 
-      await setDoc(doc(db, "users", `${user.uid}`), {
+      await setDoc(doc(db, "users", user.uid), {
         budget: budget,
       });
 
       console.log(user);
+      navigation.navigate("Login");
     } catch (error) {
       console.log(error);
+      Alert.alert("Error", `${error}`);
+      return;
+    } finally {
+      setLoading(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#3E859A" />
+      </View>
+    );
   }
 
   return (
@@ -205,6 +223,7 @@ export default function CreateAccount() {
               }}
               keyboardType="numeric"
               value={budget}
+              returnKeyType="done"
               onChangeText={setStartingBudget}
             />
           </View>

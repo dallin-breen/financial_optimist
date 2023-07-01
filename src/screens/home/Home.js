@@ -11,11 +11,11 @@ import {
   // Alert,
 } from "react-native";
 
-export default function Home() {
+export default function Home(props) {
   return (
     <KeyboardAvoidingView>
       <View>
-        <Text>Hello World!</Text>
+        <Text>{props.user}</Text>
       </View>
     </KeyboardAvoidingView>
   );
