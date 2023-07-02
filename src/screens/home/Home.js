@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   View,
   StyleSheet,
@@ -11,11 +11,13 @@ import {
   // Alert,
 } from "react-native";
 
-export default function Home(props) {
+export default function Home() {
+  const route = useRoute();
+  const { user } = route.params;
   return (
     <KeyboardAvoidingView>
       <View>
-        <Text>{props.user}</Text>
+        <Text>{user.displayName}</Text>
       </View>
     </KeyboardAvoidingView>
   );

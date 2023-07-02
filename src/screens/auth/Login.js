@@ -9,19 +9,16 @@ import {
   Pressable,
   Text,
   KeyboardAvoidingView,
-  // Alert,
+  Alert,
 } from "react-native";
-// import { SafeAreaView } from "react-native-safe-area-context";
+import { FIREBASE_AUTH } from "../../../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+const auth = FIREBASE_AUTH;
 
 export default function Login() {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  useEffect(() => {
-    console.log(email);
-    console.log(password);
-  }, [email, password]);
 
   function handleEmailChange(text) {
     setEmail(text);
@@ -32,10 +29,19 @@ export default function Login() {
   }
 
   function handleLogin() {
+    if (email === "") {
+      Alert.alert("Error", "Please enter your email");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Alert.alert("Error", "Please enter a correct email address");
+      return;
+    }
+    if (password === "") {
+      Alert.alert("Error", "Please enter your password");
+      return;
+    }
     console.log(email, password);
-
-    setEmail("");
-    setPassword("");
   }
 
   return (
