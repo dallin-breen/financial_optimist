@@ -10,6 +10,7 @@ import {
   Text,
   KeyboardAvoidingView,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { FIREBASE_AUTH } from "../../../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -52,109 +53,119 @@ export default function Login() {
 
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <View style={styles.main}>
-        <View style={styles.image}>
-          <Image
-            source={require("../../assets/placeholder_logo.png")}
-            resizeMode="contain"
-          />
-        </View>
-        <View style={styles.form}>
-          <TextInput
-            style={{
-              height: "10%",
-              width: "75%",
-              marginBottom: "5%",
-              borderWidth: 2,
-              borderColor: "#747474",
-              paddingHorizontal: 10,
-              backgroundColor: "white",
-            }}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={handleEmailChange}
-            placeholder="Email"
-          />
-          <TextInput
-            style={{
-              height: "10%",
-              width: "75%",
-              marginBottom: "5%",
-              borderWidth: 2,
-              borderColor: "#747474",
-              paddingHorizontal: 10,
-              backgroundColor: "white",
-            }}
-            keyboardType="default"
-            autoCapitalize="none"
-            value={password}
-            secureTextEntry={true}
-            onChangeText={handlePasswordChange}
-            placeholder="Password"
-          />
-          <Pressable
-            style={{
-              height: "10%",
-              width: "60%",
-              borderRadius: 20,
-              backgroundColor: "#3E859A",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "2.5%",
-            }}
-            onPress={handleLogin}
-          >
-            <Text
+      <ImageBackground
+        source={require("../../assets/money-background.jpg")}
+        resizeMode="cover"
+        style={styles.background}
+      >
+        <View style={styles.main}>
+          <View style={styles.image}>
+            <Image
+              source={require("../../assets/placeholder_logo.png")}
+              resizeMode="contain"
+            />
+          </View>
+          <View style={styles.form}>
+            <TextInput
               style={{
-                color: "white",
-                fontSize: 20,
-                fontWeight: "bold",
+                height: "10%",
+                width: "75%",
+                marginBottom: "5%",
+                borderWidth: 2,
+                borderColor: "#747474",
+                paddingHorizontal: 10,
+                backgroundColor: "white",
               }}
-            >
-              Login
-            </Text>
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate("Forgot Password")}>
-            <Text
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={handleEmailChange}
+              placeholder="Email"
+            />
+            <TextInput
               style={{
-                color: "#3E859A",
-                fontSize: 20,
-                fontWeight: "bold",
+                height: "10%",
+                width: "75%",
+                marginBottom: "5%",
+                borderWidth: 2,
+                borderColor: "#747474",
+                paddingHorizontal: 10,
+                backgroundColor: "white",
               }}
+              keyboardType="default"
+              autoCapitalize="none"
+              value={password}
+              secureTextEntry={true}
+              onChangeText={handlePasswordChange}
+              placeholder="Password"
+            />
+            <Pressable
+              style={{
+                height: "10%",
+                width: "60%",
+                borderRadius: 20,
+                backgroundColor: "#3E859A",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "2.5%",
+              }}
+              onPress={handleLogin}
             >
-              Forgot Password?
-            </Text>
-          </Pressable>
-          <View
-            style={{
-              position: "absolute",
-              height: "10%",
-              width: "100%",
-              bottom: 20,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ marginRight: "2%" }}>Don't have an account?</Text>
-            <Pressable onPress={() => navigation.navigate("Create Account")}>
-              <Text style={{ color: "#3E859A", fontWeight: "600" }}>
-                Sign up
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                }}
+              >
+                Login
               </Text>
             </Pressable>
+            <Pressable onPress={() => navigation.navigate("Forgot Password")}>
+              <Text
+                style={{
+                  color: "#3E859A",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                }}
+              >
+                Forgot Password?
+              </Text>
+            </Pressable>
+            <View
+              style={{
+                position: "absolute",
+                height: "10%",
+                width: "100%",
+                bottom: 20,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ marginRight: "2%" }}>Don't have an account?</Text>
+              <Pressable onPress={() => navigation.navigate("Create Account")}>
+                <Text style={{ color: "#3E859A", fontWeight: "600" }}>
+                  Sign up
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#D9D9D9",
+    flex: 1,
     height: "100%",
     width: "100%",
+    justifyContent: "center",
+  },
+  background: {
+    flex: 1,
     justifyContent: "center",
   },
   main: {
