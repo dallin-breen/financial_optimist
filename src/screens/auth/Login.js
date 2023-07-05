@@ -28,7 +28,7 @@ export default function Login() {
     setPassword(text);
   }
 
-  function handleLogin() {
+  async function handleLogin() {
     if (email === "") {
       Alert.alert("Error", "Please enter your email");
       return;
@@ -41,7 +41,13 @@ export default function Login() {
       Alert.alert("Error", "Please enter your password");
       return;
     }
-    console.log(email, password);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      Alert.alert("Error", `${error}`);
+      return;
+    }
   }
 
   return (

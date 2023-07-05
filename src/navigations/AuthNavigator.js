@@ -22,7 +22,7 @@ export default function AuthNavigator() {
     return unsubscribeFromAuthStateChanged;
   }, []);
   return user ? (
-    <HomeNavigator user={user} />
+    <HomeNavigator />
   ) : (
     <Stack.Navigator screenOptions={{}} initialRouteName="Login">
       <Stack.Screen

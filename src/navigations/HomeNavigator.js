@@ -4,13 +4,13 @@ import { Home } from "../screens";
 
 const Stack = createStackNavigator();
 
-export default function HomeNavigator({ user }) {
+export default function HomeNavigator() {
   return (
     <Stack.Navigator screenOptions={{}} initialRouteName="Home">
       <Stack.Screen
         options={{ headerShown: false }}
         name="Home"
-        component={() => <Home user={user} />}
+        component={Home}
       />
     </Stack.Navigator>
   );
