@@ -38,10 +38,25 @@ export default function Home() {
   }
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <View>
-        <Text>{currentYear}</Text>
-        <Text>{currentUser}</Text>
-        <Text>{currentBudget}</Text>
+      <View style={styles.main}>
+        <View style={styles.nameBar}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+            {currentUser}
+          </Text>
+        </View>
+        <View style={styles.budgetBar}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+            Your Total Balance
+          </Text>
+          <Text style={{ fontSize: 30, fontWeight: "bold" }}>
+            {currentBudget}
+          </Text>
+        </View>
+        <View style={styles.yearBar}>
+          <Text style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}>
+            {currentYear}
+          </Text>
+        </View>
         <Pressable onPress={handleSignout}>
           <Text>Sign Out</Text>
         </Pressable>
@@ -61,13 +76,31 @@ const styles = StyleSheet.create({
     height: "90%",
     width: "100%",
     alignItems: "center",
-    justifyContent: "space-between",
   },
-  image: {
-    height: "50%",
+  nameBar: {
     width: "100%",
-    alignItems: "center",
+    height: "7%",
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: "black",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  budgetBar: {
+    width: "100%",
+    height: "10%",
+    borderBottomWidth: 2,
+    borderColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  yearBar: {
+    width: "100%",
+    height: "7%",
+    borderBottomWidth: 2,
+    borderColor: "#3E859A",
+    justifyContent: "center",
+    alignItems: "center",
   },
   form: {
     height: "50%",

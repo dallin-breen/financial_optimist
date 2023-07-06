@@ -109,7 +109,6 @@ export default function CreateAccount() {
       });
 
       console.log(user);
-      navigation.navigate("Login");
     } catch (error) {
       console.log(error);
       Alert.alert("Error", `${error}`);
