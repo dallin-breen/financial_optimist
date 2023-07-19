@@ -12,7 +12,6 @@ import {
   // Alert,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
-import { async } from "@firebase/util";
 
 const auth = FIREBASE_AUTH;
 const db = FIRESTORE_DB;
@@ -23,9 +22,11 @@ export default function Home() {
   const [currentBudget, setCurrentBudget] = useState(null);
 
   useEffect(() => {
+    setCurrentUser(auth.currentUser.displayName);
+
     const year = new Date().getFullYear();
     setCurrentYear(year);
-    setCurrentUser(auth.currentUser.displayName);
+
     async function getBudget() {
       const docRef = doc(db, "users", auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
@@ -33,6 +34,7 @@ export default function Home() {
     }
     getBudget();
   }, []);
+
   function handleSignout() {
     auth.signOut();
   }
@@ -41,7 +43,7 @@ export default function Home() {
       <View style={styles.main}>
         <View style={styles.nameBar}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-            {currentUser}
+            {currentUser || "Loading..."}
           </Text>
         </View>
         <View style={styles.budgetBar}>
@@ -49,7 +51,7 @@ export default function Home() {
             Your Total Balance
           </Text>
           <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-            {currentBudget}
+            {currentBudget || "Loading..."}
           </Text>
         </View>
         <View style={styles.yearBar}>

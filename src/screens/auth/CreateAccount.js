@@ -107,10 +107,7 @@ export default function CreateAccount() {
       await setDoc(doc(db, "users", user.uid), {
         budget: budget,
       });
-
-      console.log(user);
     } catch (error) {
-      console.log(error);
       Alert.alert("Error", `${error}`);
       return;
     } finally {
