@@ -100,11 +100,8 @@ export default function CreateAccount() {
       );
       const user = userCredential.user;
 
-      await updateProfile(user, {
-        displayName: name,
-      });
-
       await setDoc(doc(db, "users", user.uid), {
+        name: name,
         budget: budget,
       });
     } catch (error) {

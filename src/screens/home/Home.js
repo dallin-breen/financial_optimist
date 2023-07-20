@@ -22,17 +22,16 @@ export default function Home() {
   const [currentBudget, setCurrentBudget] = useState(null);
 
   useEffect(() => {
-    setCurrentUser(auth.currentUser.displayName);
-
     const year = new Date().getFullYear();
     setCurrentYear(year);
 
-    async function getBudget() {
+    async function getUserInfo() {
       const docRef = doc(db, "users", auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
+      setCurrentUser(docSnap.data().name);
       setCurrentBudget(docSnap.data().budget);
     }
-    getBudget();
+    getUserInfo();
   }, []);
 
   function handleSignout() {
