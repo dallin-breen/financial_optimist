@@ -13,7 +13,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 export default function CreateAccount() {
@@ -100,14 +104,39 @@ export default function CreateAccount() {
       );
       const user = userCredential.user;
 
+      await updateProfile(user, {
+        displayName: name,
+      });
+
       await setDoc(doc(db, "users", user.uid), {
         name: name,
         budget: budget,
       });
+
+      await sendEmailVerification(user);
+
+      Alert.alert(
+        "Confirm Email",
+        "Please go to your email and verify your account",
+        [
+          {
+            text: "Return to Login",
+            onPress: () => {
+              auth.signOut();
+              navigation.navigate("Login");
+            },
+          },
+        ]
+      );
     } catch (error) {
       Alert.alert("Error", `${error}`);
       return;
     } finally {
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setBudget("$ 0.00");
       setLoading(false);
     }
   }

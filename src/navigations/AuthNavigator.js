@@ -15,13 +15,14 @@ export default function AuthNavigator() {
     const unsubscribeFromAuthStateChanged = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
+        console.log(user);
       } else {
         setUser(undefined);
       }
     });
     return unsubscribeFromAuthStateChanged;
   }, []);
-  return user ? (
+  return user && user.emailVerified ? (
     <HomeNavigator />
   ) : (
     <Stack.Navigator screenOptions={{}} initialRouteName="Login">
