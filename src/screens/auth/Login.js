@@ -13,7 +13,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { FIREBASE_AUTH } from "../../../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 const auth = FIREBASE_AUTH;
 
 export default function Login() {
@@ -44,7 +44,17 @@ export default function Login() {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const unsubscribeFromAuthStateChanged = onAuthStateChanged(
+        auth,
+        async (user) => {
+          if (user) {
+            auth.signOut();
+          } else {
+            await signInWithEmailAndPassword(auth, email, password);
+          }
+        }
+      );
+      unsubscribeFromAuthStateChanged();
     } catch (error) {
       Alert.alert("Error", `${error}`);
       return;

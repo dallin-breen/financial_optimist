@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from "react";
-// import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import {
   View,
@@ -18,7 +17,7 @@ import {
   sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function CreateAccount() {
   const [name, setName] = useState("");

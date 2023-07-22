@@ -15,7 +15,6 @@ export default function AuthNavigator() {
     const unsubscribeFromAuthStateChanged = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
-        console.log(user);
       } else {
         setUser(undefined);
       }
