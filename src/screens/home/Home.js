@@ -54,9 +54,23 @@ export default function Home() {
           </Text>
         </View>
         <View style={styles.yearBar}>
+          <Pressable onPress={() => setCurrentYear(currentYear - 1)}>
+            <Text
+              style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}
+            >
+              {"<"}
+            </Text>
+          </Pressable>
           <Text style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}>
             {currentYear}
           </Text>
+          <Pressable onPress={() => setCurrentYear(currentYear + 1)}>
+            <Text
+              style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}
+            >
+              {">"}
+            </Text>
+          </Pressable>
         </View>
         <Pressable onPress={handleSignout}>
           <Text>Sign Out</Text>
@@ -100,7 +114,8 @@ const styles = StyleSheet.create({
     height: "7%",
     borderBottomWidth: 2,
     borderColor: "#3E859A",
-    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
     alignItems: "center",
   },
   form: {
