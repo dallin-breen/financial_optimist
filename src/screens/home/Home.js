@@ -9,7 +9,8 @@ import {
   Pressable,
   Text,
   KeyboardAvoidingView,
-  // Alert,
+  Alert,
+  ScrollView,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -20,6 +21,20 @@ export default function Home() {
   const [currentYear, setCurrentYear] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentBudget, setCurrentBudget] = useState(null);
+  const months = [
+    { id: 1, name: "January" },
+    { id: 2, name: "February" },
+    { id: 3, name: "March" },
+    { id: 4, name: "April" },
+    { id: 5, name: "May" },
+    { id: 6, name: "June" },
+    { id: 7, name: "July" },
+    { id: 8, name: "August" },
+    { id: 9, name: "September" },
+    { id: 10, name: "October" },
+    { id: 11, name: "November" },
+    { id: 12, name: "December" },
+  ];
 
   useEffect(() => {
     const year = new Date().getFullYear();
@@ -34,9 +49,6 @@ export default function Home() {
     getUserInfo();
   }, []);
 
-  function handleSignout() {
-    auth.signOut();
-  }
   return (
     <KeyboardAvoidingView style={styles.container}>
       <View style={styles.main}>
@@ -44,6 +56,9 @@ export default function Home() {
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>
             {currentUser || "Loading..."}
           </Text>
+          <Pressable onPress={() => auth.signOut()}>
+            <Text>Sign Out</Text>
+          </Pressable>
         </View>
         <View style={styles.budgetBar}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>
@@ -72,9 +87,22 @@ export default function Home() {
             </Text>
           </Pressable>
         </View>
-        <Pressable onPress={handleSignout}>
-          <Text>Sign Out</Text>
-        </Pressable>
+        <ScrollView style={styles.months}>
+          {months.map((month) => (
+            <View style={styles.monthBar} key={month.id}>
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                {month.name}
+              </Text>
+              <Pressable onPress={() => Alert.alert("Month", month.name)}>
+                <Text
+                  style={{ fontSize: 24, fontWeight: "bold", color: "#3E859A" }}
+                >
+                  {"View"}
+                </Text>
+              </Pressable>
+            </View>
+          ))}
+        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );
@@ -95,6 +123,7 @@ const styles = StyleSheet.create({
   nameBar: {
     width: "100%",
     height: "7%",
+    flexDirection: "row",
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderColor: "black",
@@ -116,6 +145,20 @@ const styles = StyleSheet.create({
     borderColor: "#3E859A",
     flexDirection: "row",
     justifyContent: "space-evenly",
+    alignItems: "center",
+  },
+  months: {
+    width: "100%",
+    flexDirection: "column",
+  },
+  monthBar: {
+    width: "100%",
+    height: "8%",
+    padding: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderColor: "#3E859A",
+    borderBottomWidth: 2,
     alignItems: "center",
   },
   form: {
