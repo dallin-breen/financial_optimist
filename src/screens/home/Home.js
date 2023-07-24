@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../firebase";
 import {
   View,
   StyleSheet,
-  Image,
-  TextInput,
   Pressable,
   Text,
   KeyboardAvoidingView,
   Alert,
   ScrollView,
+  // Image,
+  // TextInput,
+  // TouchableOpacity,
+  // FlatList,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
+// import { useNavigation, useRoute } from "@react-navigation/native";
+// import DropDownPicker from "react-native-dropdown-picker";
 
 const auth = FIREBASE_AUTH;
 const db = FIRESTORE_DB;
@@ -21,6 +24,7 @@ export default function Home() {
   const [currentYear, setCurrentYear] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentBudget, setCurrentBudget] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
   const months = [
     { id: 1, name: "January" },
     { id: 2, name: "February" },
@@ -48,6 +52,12 @@ export default function Home() {
     }
     getUserInfo();
   }, []);
+
+  function handleMonthSelection(month) {
+    setSelectedMonth(month);
+    console.log(selectedMonth);
+    Alert.alert("Month", month);
+  }
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -87,22 +97,23 @@ export default function Home() {
             </Text>
           </Pressable>
         </View>
-        <ScrollView style={styles.months}>
-          {months.map((month) => (
-            <View style={styles.monthBar} key={month.id}>
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {month.name}
-              </Text>
-              <Pressable onPress={() => Alert.alert("Month", month.name)}>
-                <Text
-                  style={{ fontSize: 24, fontWeight: "bold", color: "#3E859A" }}
-                >
-                  {"View"}
-                </Text>
-              </Pressable>
-            </View>
-          ))}
-        </ScrollView>
+        <View style={styles.monthBarContainer}>
+          <ScrollView
+            style={styles.monthBar}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false} // Remove the scrollbar
+          >
+            {months.map((month) => (
+              <View style={styles.monthItem} key={month.id}>
+                <Pressable onPress={() => handleMonthSelection(month.name)}>
+                  <Text style={{ fontSize: 22, fontWeight: "bold" }}>
+                    {month.name}
+                  </Text>
+                </Pressable>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -147,19 +158,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "center",
   },
-  months: {
-    width: "100%",
-    flexDirection: "column",
+  monthBarContainer: {
+    height: 50, // Set the desired height for the monthBar container
+    borderBottomWidth: 2,
+    borderBottomColor: "black",
   },
   monthBar: {
-    width: "100%",
-    height: "8%",
-    padding: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderColor: "#3E859A",
-    borderBottomWidth: 2,
+    flexGrow: 1, // Allow the ScrollView to take the full height of its container
+  },
+  monthItem: {
+    height: "100%", // Take the full height of the monthBar container
+    justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 15,
   },
   form: {
     height: "50%",
