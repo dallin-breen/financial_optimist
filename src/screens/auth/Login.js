@@ -50,7 +50,15 @@ export default function Login() {
           if (user) {
             auth.signOut();
           } else {
-            await signInWithEmailAndPassword(auth, email, password);
+            try {
+              await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+              Alert.alert(
+                "User Credentials Invalid",
+                "Please check to ensure that you are using the correct email and password"
+              );
+              return;
+            }
           }
         }
       );

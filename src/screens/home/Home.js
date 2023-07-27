@@ -70,7 +70,7 @@ export default function Home() {
             <Entypo
               name="menu"
               size={24}
-              color={"black"}
+              color={"#3E859A"}
               onPress={() => Alert.alert("Settings", "Settings were pressed!")}
             />
           </View>
@@ -83,7 +83,7 @@ export default function Home() {
             <Entypo
               name="log-out"
               size={24}
-              color={"black"}
+              color={"#3E859A"}
               onPress={() => auth.signOut()}
             />
           </View>
@@ -101,18 +101,18 @@ export default function Home() {
             <Entypo
               name="arrow-bold-left"
               size={24}
-              color={"#3E859A"}
+              color={"white"}
               onPress={() => setCurrentYear(currentYear - 1)}
             />
           </View>
-          <Text style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}>
+          <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>
             {currentYear}
           </Text>
           <View>
             <Entypo
               name="arrow-bold-right"
               size={24}
-              color={"#3E859A"}
+              color={"white"}
               onPress={() => setCurrentYear(currentYear + 1)}
             />
           </View>
@@ -124,9 +124,20 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
           >
             {months.map((month) => (
-              <View style={styles.monthItem} key={month.id}>
+              <View
+                style={[
+                  styles.monthItem,
+                  selectedMonth === month.name && styles.selectedMonthItem,
+                ]}
+                key={month.id}
+              >
                 <Pressable onPress={() => handleMonthSelection(month.name)}>
-                  <Text style={{ fontSize: 22, fontWeight: "bold" }}>
+                  <Text
+                    style={[
+                      styles.monthText,
+                      selectedMonth === month.name && styles.selectedMonthText,
+                    ]}
+                  >
                     {month.name}
                   </Text>
                 </Pressable>
@@ -183,7 +194,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "7%",
     borderBottomWidth: 2,
-    borderColor: "#3E859A",
+    backgroundColor: "#3E859A",
     flexDirection: "row",
     padding: 10,
     justifyContent: "space-between",
@@ -202,6 +213,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 15,
+  },
+  selectedMonthItem: {
+    backgroundColor: "#a3a0a0",
+  },
+  monthText: {
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  selectedMonthText: {
+    color: "white",
   },
   instructions: {
     width: "100%",
