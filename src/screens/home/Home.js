@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../firebase";
+import { Entypo } from "@expo/vector-icons";
 import {
   View,
   StyleSheet,
@@ -16,7 +17,6 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import MonthData from "../../components/MonthData";
 // import { useNavigation, useRoute } from "@react-navigation/native";
-// import DropDownPicker from "react-native-dropdown-picker";
 
 const auth = FIREBASE_AUTH;
 const db = FIRESTORE_DB;
@@ -66,14 +66,27 @@ export default function Home() {
     <KeyboardAvoidingView style={styles.container}>
       <View style={styles.main}>
         <View style={styles.nameBar}>
-          <View style={{ flex: 1, alignItems: "center", marginLeft: 50 }}>
+          <View>
+            <Entypo
+              name="menu"
+              size={24}
+              color={"black"}
+              onPress={() => Alert.alert("Settings", "Settings were pressed!")}
+            />
+          </View>
+          <View>
             <Text style={{ fontSize: 20, fontWeight: "bold" }}>
               {currentUser || "Loading..."}
             </Text>
           </View>
-          <Pressable onPress={() => auth.signOut()}>
-            <Text>Sign Out</Text>
-          </Pressable>
+          <View>
+            <Entypo
+              name="log-out"
+              size={24}
+              color={"black"}
+              onPress={() => auth.signOut()}
+            />
+          </View>
         </View>
         <View style={styles.budgetBar}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>
@@ -84,23 +97,25 @@ export default function Home() {
           </Text>
         </View>
         <View style={styles.yearBar}>
-          <Pressable onPress={() => setCurrentYear(currentYear - 1)}>
-            <Text
-              style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}
-            >
-              {"<"}
-            </Text>
-          </Pressable>
+          <View>
+            <Entypo
+              name="arrow-bold-left"
+              size={24}
+              color={"#3E859A"}
+              onPress={() => setCurrentYear(currentYear - 1)}
+            />
+          </View>
           <Text style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}>
             {currentYear}
           </Text>
-          <Pressable onPress={() => setCurrentYear(currentYear + 1)}>
-            <Text
-              style={{ fontSize: 30, fontWeight: "bold", color: "#3E859A" }}
-            >
-              {">"}
-            </Text>
-          </Pressable>
+          <View>
+            <Entypo
+              name="arrow-bold-right"
+              size={24}
+              color={"#3E859A"}
+              onPress={() => setCurrentYear(currentYear + 1)}
+            />
+          </View>
         </View>
         <View style={styles.monthBarContainer}>
           <ScrollView
@@ -153,7 +168,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderColor: "black",
-    justifyContent: "space-between", // This will position the elements with space between them
+    justifyContent: "space-between",
     alignItems: "center",
   },
   budgetBar: {
@@ -170,19 +185,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderColor: "#3E859A",
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    padding: 10,
+    justifyContent: "space-between",
     alignItems: "center",
   },
   monthBarContainer: {
-    height: 50, // Set the desired height for the monthBar container
+    height: 50,
     borderBottomWidth: 2,
     borderBottomColor: "black",
   },
   monthBar: {
-    flexGrow: 1, // Allow the ScrollView to take the full height of its container
+    flexGrow: 1,
   },
   monthItem: {
-    height: "100%", // Take the full height of the monthBar container
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 15,
