@@ -14,6 +14,7 @@ import {
   // FlatList,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
+import MonthData from "../../components/MonthData";
 // import { useNavigation, useRoute } from "@react-navigation/native";
 // import DropDownPicker from "react-native-dropdown-picker";
 
@@ -54,9 +55,11 @@ export default function Home() {
   }, []);
 
   function handleMonthSelection(month) {
-    setSelectedMonth(month);
-    console.log(selectedMonth);
-    Alert.alert("Month", month);
+    if (selectedMonth && selectedMonth === month) {
+      setSelectedMonth(null);
+    } else {
+      setSelectedMonth(month);
+    }
   }
 
   return (
@@ -101,7 +104,7 @@ export default function Home() {
           <ScrollView
             style={styles.monthBar}
             horizontal={true}
-            showsHorizontalScrollIndicator={false} // Remove the scrollbar
+            showsHorizontalScrollIndicator={false}
           >
             {months.map((month) => (
               <View style={styles.monthItem} key={month.id}>
@@ -114,6 +117,15 @@ export default function Home() {
             ))}
           </ScrollView>
         </View>
+        {selectedMonth ? (
+          <MonthData month={selectedMonth} />
+        ) : (
+          <View style={styles.instructions}>
+            <Text style={{ fontSize: 22, fontWeight: "bold", color: "black" }}>
+              Select the month you want to view
+            </Text>
+          </View>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -171,6 +183,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 15,
+  },
+  instructions: {
+    width: "100%",
+    height: "70%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   form: {
     height: "50%",
