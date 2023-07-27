@@ -66,9 +66,11 @@ export default function Home() {
     <KeyboardAvoidingView style={styles.container}>
       <View style={styles.main}>
         <View style={styles.nameBar}>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-            {currentUser || "Loading..."}
-          </Text>
+          <View style={{ flex: 1, alignItems: "center", marginLeft: 50 }}>
+            <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+              {currentUser || "Loading..."}
+            </Text>
+          </View>
           <Pressable onPress={() => auth.signOut()}>
             <Text>Sign Out</Text>
           </Pressable>
@@ -144,13 +146,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   nameBar: {
+    padding: 10,
     width: "100%",
     height: "7%",
     flexDirection: "row",
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderColor: "black",
-    justifyContent: "center",
+    justifyContent: "space-between", // This will position the elements with space between them
     alignItems: "center",
   },
   budgetBar: {
