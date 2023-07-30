@@ -79,9 +79,14 @@ export default function Login() {
         <View style={styles.main}>
           <View style={styles.image}>
             <Image
-              style={styles.image}
+              style={{
+                width: "80%",
+                height: "55%",
+                borderWidth: 2,
+                borderColor: "#747474",
+              }}
               source={require("../../assets/financial-optimist-logo.jpg")}
-              resizeMode="contain"
+              resizeMode="cover"
             />
           </View>
           <View style={styles.form}>
