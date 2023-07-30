@@ -8,9 +8,11 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
+import AddData from "./AddData";
 
 export default function MonthData({ month }) {
   const [refreshing, setRefreshing] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -19,6 +21,14 @@ export default function MonthData({ month }) {
     }, 2000);
   }, []);
 
+  function openModal() {
+    setModalIsOpen(true);
+  }
+
+  function closeModal() {
+    setModalIsOpen(false);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.addToList}>
@@ -26,7 +36,7 @@ export default function MonthData({ month }) {
           name="add-to-list"
           size={24}
           color={"black"}
-          onPress={() => Alert.alert("Add to list")}
+          onPress={openModal}
         />
       </View>
       <ScrollView
@@ -38,6 +48,7 @@ export default function MonthData({ month }) {
       >
         <Text style={styles.item}>{month}</Text>
       </ScrollView>
+      <AddData visible={modalIsOpen} close={closeModal} />
     </View>
   );
 }
@@ -46,14 +57,11 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "70%",
+    flexDirection: "column",
     padding: 10,
-    // borderBottomWidth: 2,
-    // borderBottomColor: "black",
   },
   addToList: {
     width: "100%",
-    // borderBottomWidth: 2,
-    // borderBottomColor: "black",
   },
   main: {
     flexDirection: "column",
