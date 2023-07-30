@@ -79,7 +79,8 @@ export default function Login() {
         <View style={styles.main}>
           <View style={styles.image}>
             <Image
-              source={require("../../assets/placeholder_logo.png")}
+              style={styles.image}
+              source={require("../../assets/financial-optimist-logo.jpg")}
               resizeMode="contain"
             />
           </View>
