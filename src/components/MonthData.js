@@ -31,7 +31,7 @@ export default function MonthData({ month }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.addToList}>
+      <View>
         <Entypo
           name="add-to-list"
           size={24}
@@ -46,7 +46,9 @@ export default function MonthData({ month }) {
         }
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.item}>{month}</Text>
+        <View style={styles.item}>
+          <Text style={styles.itemDate}>Monday, January 1st, 2023</Text>
+        </View>
       </ScrollView>
       <AddData visible={modalIsOpen} close={closeModal} />
     </View>
@@ -60,13 +62,25 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     padding: 10,
   },
-  addToList: {
-    width: "100%",
-  },
   main: {
+    width: "100%",
+    height: "100%",
+    borderColor: "black",
+    borderBottomWidth: 2,
+    borderTopWidth: 2,
+    borderRightWidth: 2,
+    borderLeftWidth: 2,
     flexDirection: "column",
   },
   item: {
-    alignSelf: "center",
+    height: 30,
+    padding: 5,
+    backgroundColor: "#3E859A",
+    justifyContent: "center",
+  },
+  itemDate: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
