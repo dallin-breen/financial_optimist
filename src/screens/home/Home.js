@@ -44,6 +44,8 @@ export default function Home() {
   useEffect(() => {
     const year = new Date().getFullYear();
     setCurrentYear(year);
+    const month = new Date().getMonth();
+    setSelectedMonth(months[month].name);
 
     async function getUserInfo() {
       const docRef = doc(db, "users", auth.currentUser.uid);
