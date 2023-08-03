@@ -7,6 +7,7 @@ import {
   StyleSheet,
   RefreshControl,
   Alert,
+  Pressable,
 } from "react-native";
 import AddData from "./AddData";
 
@@ -31,7 +32,7 @@ export default function MonthData({ month }) {
 
   return (
     <View style={styles.container}>
-      <View>
+      <View style={styles.addButton}>
         <Entypo
           name="add-to-list"
           size={24}
@@ -47,7 +48,36 @@ export default function MonthData({ month }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.item}>
-          <Text style={styles.itemDate}>Monday, January 1st, 2023</Text>
+          <View style={styles.itemDate}>
+            <Text
+              style={{
+                fontSize: 20,
+                color: "white",
+                fontWeight: "bold",
+                alignSelf: "center",
+              }}
+            >
+              Monday, January 1st, 2023
+            </Text>
+            <Entypo
+              name="circle-with-minus"
+              size={24}
+              color={"black"}
+              onPress={() => Alert.alert("Remove Info")}
+            />
+          </View>
+          <View style={styles.itemLabels}>
+            <Text style={styles.columnOne}>Title</Text>
+            <Text style={styles.columnTwo}>Amount</Text>
+            <Text style={styles.columnThree}>Total</Text>
+          </View>
+          <Pressable onPress={() => Alert.alert("Selected Info")}>
+            <View style={styles.itemInfo}>
+              <Text style={styles.columnOne}>Target for supplies</Text>
+              <Text style={styles.columnTwo}>$20.00</Text>
+              <Text style={styles.columnThree}>$119,980.00</Text>
+            </View>
+          </Pressable>
         </View>
       </ScrollView>
       <AddData visible={modalIsOpen} close={closeModal} />
@@ -65,22 +95,55 @@ const styles = StyleSheet.create({
   main: {
     width: "100%",
     height: "100%",
+    flexDirection: "column",
+  },
+  addButton: {
+    marginBottom: 10,
+  },
+  item: {
+    height: 90,
+    justifyContent: "space-between",
+    marginBottom: 5,
+    // borderColor: "black",
+    // borderBottomWidth: 2,
+    // borderTopWidth: 2,
+    // borderRightWidth: 2,
+    // borderLeftWidth: 2,
+  },
+  itemDate: {
+    padding: 5,
+    backgroundColor: "#3E859A",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderColor: "black",
+    borderTopWidth: 2,
+    borderRightWidth: 2,
+    borderLeftWidth: 2,
+  },
+  itemLabels: {
+    padding: 5,
+    flexDirection: "row",
     borderColor: "black",
     borderBottomWidth: 2,
     borderTopWidth: 2,
     borderRightWidth: 2,
     borderLeftWidth: 2,
-    flexDirection: "column",
   },
-  item: {
-    height: 30,
+  itemInfo: {
     padding: 5,
-    backgroundColor: "#3E859A",
-    justifyContent: "center",
+    flexDirection: "row",
+    borderColor: "black",
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    borderLeftWidth: 2,
   },
-  itemDate: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
+  columnOne: {
+    width: "60%",
+  },
+  columnTwo: {
+    width: "20%",
+  },
+  columnThree: {
+    width: "20%",
   },
 });
