@@ -11,9 +11,23 @@ import {
 } from "react-native";
 import AddData from "./AddData";
 
-export default function MonthData({ month }) {
+export default function MonthData({ month, year }) {
+  const selectedMonth = convertMonthToInt(month);
+  const selectedYear = year;
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
+  const [canAdd, setCanAdd] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (selectedMonth < currentMonth && selectedYear <= currentYear) {
+      setCanAdd(false);
+    } else {
+      setCanAdd(true);
+    }
+  }, [selectedMonth, currentMonth, selectedYear]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -30,15 +44,49 @@ export default function MonthData({ month }) {
     setModalIsOpen(false);
   }
 
+  function convertMonthToInt(month) {
+    const months = {
+      January: 1,
+      February: 2,
+      March: 3,
+      April: 4,
+      May: 5,
+      June: 6,
+      July: 7,
+      August: 8,
+      September: 9,
+      October: 10,
+      November: 11,
+      December: 12,
+    };
+
+    let monthNumber = months[month];
+    return monthNumber;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.addButton}>
-        <Entypo
-          name="add-to-list"
-          size={24}
-          color={"black"}
-          onPress={openModal}
-        />
+        {canAdd ? (
+          <Entypo
+            name="add-to-list"
+            size={24}
+            color={"black"}
+            onPress={openModal}
+          />
+        ) : (
+          <Entypo
+            name="add-to-list"
+            size={24}
+            color={"black"}
+            onPress={() =>
+              Alert.alert(
+                "Oops!",
+                "You can no longer add an item to this month, it is in the past!"
+              )
+            }
+          />
+        )}
       </View>
       <ScrollView
         style={styles.main}
@@ -47,7 +95,7 @@ export default function MonthData({ month }) {
         }
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.item}>
+        {/* <View style={styles.item}>
           <View style={styles.itemDate}>
             <Text
               style={{
@@ -78,7 +126,7 @@ export default function MonthData({ month }) {
               <Text style={styles.columnThree}>$119,980.00</Text>
             </View>
           </Pressable>
-        </View>
+        </View> */}
       </ScrollView>
       <AddData visible={modalIsOpen} close={closeModal} month={month} />
     </View>

@@ -13,7 +13,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function AddData({ visible, close, month }) {
-  console.log(month);
+  // console.log(month);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("$ 0.00");
   const [openType, setOpenType] = useState(false);

@@ -148,7 +148,7 @@ export default function Home() {
           </ScrollView>
         </View>
         {selectedMonth ? (
-          <MonthData month={selectedMonth} />
+          <MonthData month={selectedMonth} year={currentYear} />
         ) : (
           <View style={styles.instructions}>
             <Text style={{ fontSize: 22, fontWeight: "bold", color: "black" }}>
