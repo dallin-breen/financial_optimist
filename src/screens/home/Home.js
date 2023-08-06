@@ -70,7 +70,7 @@ export default function Home() {
         <View style={styles.nameBar}>
           <View>
             <Entypo
-              name="menu"
+              name="cog"
               size={24}
               color={"#3E859A"}
               onPress={() => Alert.alert("Settings", "Settings were pressed!")}

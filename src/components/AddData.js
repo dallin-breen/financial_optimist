@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Entypo } from "@expo/vector-icons";
 import {
   Modal,
   View,
@@ -8,10 +9,19 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-export default function AddData({ visible, close }) {
+export default function AddData({ visible, close, month }) {
+  console.log(month);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("$ 0.00");
+  const [openType, setOpenType] = useState(false);
+  const [typeValue, setTypeValue] = useState(null);
+  const types = [
+    { label: "Expense", value: "Expense" },
+    { label: "Income", value: "Income" },
+  ];
 
   function handleTitle(text) {
     setTitle(text);
@@ -27,9 +37,12 @@ export default function AddData({ visible, close }) {
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.container}>
         <View style={styles.modalContent}>
-          <Pressable onPress={close}>
-            <Text>Close Modal</Text>
-          </Pressable>
+          <Entypo
+            name="circle-with-cross"
+            size={24}
+            style={{ marginBottom: 10, marginLeft: "auto" }}
+            onPress={close}
+          />
           <View style={styles.inputs}>
             <Text style={{ fontSize: 17, fontWeight: "bold" }}>Title</Text>
             <TextInput
@@ -40,7 +53,7 @@ export default function AddData({ visible, close }) {
                 borderColor: "#747474",
                 paddingHorizontal: 10,
                 backgroundColor: "white",
-                borderRadius: 50,
+                borderRadius: 5,
               }}
               keyboardType="default"
               value={title}
@@ -57,12 +70,39 @@ export default function AddData({ visible, close }) {
                 borderColor: "#747474",
                 paddingHorizontal: 10,
                 backgroundColor: "white",
-                borderRadius: 50,
+                borderRadius: 5,
               }}
               keyboardType="numeric"
               value={amount}
               returnKeyType="done"
               onChangeText={handleAmount}
+            />
+          </View>
+          <View style={styles.inputs}>
+            <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+              Select the Date
+            </Text>
+            <DateTimePicker
+              mode="date"
+              // minimumDate={new Date()}
+              value={new Date()}
+            />
+          </View>
+          <View style={styles.inputs}>
+            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Type</Text>
+            <DropDownPicker
+              style={{
+                height: "60%",
+                width: "100%",
+                borderWidth: 2,
+                borderColor: "#747474",
+                backgroundColor: "white",
+              }}
+              open={openType}
+              value={typeValue}
+              items={types}
+              setOpen={setOpenType}
+              setValue={setTypeValue}
             />
           </View>
         </View>
