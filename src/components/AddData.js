@@ -9,13 +9,15 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import DatePicker from "react-native-modern-datepicker";
 import DropDownPicker from "react-native-dropdown-picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function AddData({ visible, close, month }) {
   // console.log(month);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("$ 0.00");
+  const [openDate, setOpenDate] = useState(false);
+  const [dateValue, setDateValue] = useState(null);
   const [openType, setOpenType] = useState(false);
   const [typeValue, setTypeValue] = useState(null);
   const types = [
@@ -31,6 +33,10 @@ export default function AddData({ visible, close, month }) {
     let numericValue = text.replace(/[^0-9.,]/g, "");
     const valueWithSign = "$ " + numericValue;
     setAmount(valueWithSign);
+  }
+
+  function handleDateSelector() {
+    setOpenDate(!openDate);
   }
 
   return (
@@ -79,14 +85,37 @@ export default function AddData({ visible, close, month }) {
             />
           </View>
           <View style={styles.inputs}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>
-              Select the Date
-            </Text>
-            <DateTimePicker
-              mode="date"
-              // minimumDate={new Date()}
-              value={new Date()}
-            />
+            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Date</Text>
+            <Pressable
+              style={{
+                height: "60%",
+                width: "100%",
+                borderWidth: 2,
+                borderColor: "#747474",
+                paddingHorizontal: 10,
+                backgroundColor: "white",
+                borderRadius: 5,
+                justifyContent: "center",
+              }}
+              onPress={handleDateSelector}
+            >
+              <Text>{!dateValue ? "-- Select a Date --" : dateValue}</Text>
+            </Pressable>
+            <Modal animationType="fade" transparent={true} visible={openDate}>
+              <View style={styles.centeredView}>
+                <View style={styles.dateSelector}>
+                  <DatePicker
+                    mode="calendar"
+                    // onSelectedChange={handleDateSelector}
+                  />
+                  <Pressable onPress={handleDateSelector}>
+                    <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                      Close
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </Modal>
           </View>
           <View style={styles.inputs}>
             <Text style={{ fontSize: 17, fontWeight: "bold" }}>Type</Text>
@@ -131,5 +160,19 @@ const styles = StyleSheet.create({
     height: "10%",
     marginBottom: "5%",
     justifyContent: "space-between",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dateSelector: {
+    width: "70%",
+    height: "35%",
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
