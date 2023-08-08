@@ -128,7 +128,14 @@ export default function MonthData({ month, year }) {
           </Pressable>
         </View> */}
       </ScrollView>
-      <AddData visible={modalIsOpen} close={closeModal} month={month} />
+      {modalIsOpen ? (
+        <AddData
+          visible={modalIsOpen}
+          close={closeModal}
+          month={selectedMonth}
+          year={selectedYear}
+        />
+      ) : null}
     </View>
   );
 }

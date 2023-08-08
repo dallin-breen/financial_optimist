@@ -83,14 +83,16 @@ export default function CreateAccount() {
       return;
     }
 
-    if (budget === "$ ") {
+    if (budget === "$ " || budget === "$ 0.00") {
       Alert.alert("Error", "Please enter your balance");
       return;
     }
 
     if (!/^(\$ )?(\d{1,3}(,\d{3})*|(\d+))(\.\d{2})?$/.test(budget)) {
-      // Input format is incorrect
-      Alert.alert("Error", "Please enter your budget with the correct form");
+      Alert.alert(
+        "Error",
+        "Please enter your budget in the correct form (ex. $1.25 or $1,234.56)"
+      );
       return;
     }
 
