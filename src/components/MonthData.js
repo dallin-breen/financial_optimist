@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import AddData from "./AddData";
 
-export default function MonthData({ month, year }) {
+export default function MonthData({ userId, month, year }) {
   const selectedMonth = convertMonthToInt(month);
   const selectedYear = year;
   const currentMonth = new Date().getMonth() + 1;
@@ -130,6 +130,7 @@ export default function MonthData({ month, year }) {
       </ScrollView>
       {modalIsOpen ? (
         <AddData
+          userId={userId}
           visible={modalIsOpen}
           close={closeModal}
           month={selectedMonth}

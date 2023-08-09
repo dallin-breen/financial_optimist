@@ -9,24 +9,29 @@ import {
   StyleSheet,
   Alert,
   Switch,
+  ActivityIndicator,
 } from "react-native";
 import DatePicker from "react-native-modern-datepicker";
 import DropDownPicker from "react-native-dropdown-picker";
+import { doc, addDoc, collection } from "firebase/firestore";
+import { FIRESTORE_DB } from "../../firebase";
 
-export default function AddData({ visible, close, month, year }) {
+export default function AddData({ userId, visible, close, month, year }) {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("$ 0.00");
   const [openDate, setOpenDate] = useState(false);
-  const [dateValue, setDateValue] = useState(null);
+  const [date, setDate] = useState(null);
   const [minimumDate, setMinimumDate] = useState(null);
   const [current, setCurrent] = useState(null);
   const [openType, setOpenType] = useState(false);
   const [typeValue, setTypeValue] = useState(null);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [loading, setLoading] = useState(false);
   const types = [
     { label: "Expense", value: "Expense" },
     { label: "Income", value: "Income" },
   ];
+  const db = FIRESTORE_DB;
 
   useEffect(() => {
     let minimum = new Date();
@@ -92,14 +97,14 @@ export default function AddData({ visible, close, month, year }) {
 
     let formattedDate = `${monthName} ${dayOfMonth}, ${yearString}`;
 
-    setDateValue(formattedDate);
+    setDate(formattedDate);
   }
 
   function handleSwitch() {
     setIsRecurring((previousState) => !previousState);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (title === "") {
       Alert.alert("Error", "Please put a title");
       return;
@@ -118,7 +123,7 @@ export default function AddData({ visible, close, month, year }) {
       return;
     }
 
-    if (!dateValue) {
+    if (!date) {
       Alert.alert("Error", "Please enter a date");
       return;
     }
@@ -128,140 +133,182 @@ export default function AddData({ visible, close, month, year }) {
       return;
     }
 
-    close();
+    const inputData = {
+      title: title,
+      amount: amount,
+      date: date,
+      recurring: isRecurring,
+    };
+
+    if (typeValue === "Income") {
+      try {
+        setLoading(true);
+        let docRef = doc(db, "users", userId);
+        let colRef = collection(docRef, "incomes");
+        await addDoc(colRef, inputData);
+        close();
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+        return;
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      try {
+        setLoading(true);
+        let docRef = doc(db, "users", userId);
+        let colRef = collection(docRef, "expenses");
+        await addDoc(colRef, inputData);
+        close();
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+        return;
+      } finally {
+        setLoading(false);
+      }
+    }
   }
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.container}>
-        <View style={styles.modalContent}>
-          <Entypo
-            name="circle-with-cross"
-            size={24}
-            style={{ marginBottom: 10, marginLeft: "auto" }}
-            onPress={close}
-          />
-          <View style={styles.inputs}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Title</Text>
-            <TextInput
-              style={{
-                height: "60%",
-                width: "100%",
-                borderWidth: 2,
-                borderColor: "#747474",
-                paddingHorizontal: 10,
-                backgroundColor: "white",
-                borderRadius: 5,
-              }}
-              keyboardType="default"
-              value={title}
-              onChangeText={handleTitle}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3E859A" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      ) : (
+        <View style={styles.container}>
+          <View style={styles.modalContent}>
+            <Entypo
+              name="circle-with-cross"
+              size={24}
+              style={{ marginBottom: 10, marginLeft: "auto" }}
+              onPress={close}
             />
-          </View>
-          <View style={styles.inputs}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Amount</Text>
-            <TextInput
-              style={{
-                height: "60%",
-                width: "100%",
-                borderWidth: 2,
-                borderColor: "#747474",
-                paddingHorizontal: 10,
-                backgroundColor: "white",
-                borderRadius: 5,
-              }}
-              keyboardType="numeric"
-              value={amount}
-              returnKeyType="done"
-              onChangeText={handleAmount}
-            />
-          </View>
-          <View style={styles.inputs}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Date</Text>
-            <Pressable
-              style={{
-                height: "60%",
-                width: "100%",
-                borderWidth: 2,
-                borderColor: "#747474",
-                paddingHorizontal: 10,
-                backgroundColor: "white",
-                borderRadius: 5,
-                justifyContent: "center",
-              }}
-              onPress={handleDateSelector}
-            >
-              <Text>{!dateValue ? "-- Select a Date --" : dateValue}</Text>
-            </Pressable>
-            <Modal animationType="fade" transparent={true} visible={openDate}>
-              <View style={styles.centeredView}>
-                <View style={styles.dateSelector}>
-                  <DatePicker
-                    mode="calendar"
-                    minimumDate={minimumDate}
-                    current={current}
-                    onSelectedChange={handleDateChange}
-                  />
-                  <Pressable onPress={handleDateSelector}>
-                    <Text style={{ fontSize: 17, fontWeight: "bold" }}>
-                      Close
-                    </Text>
-                  </Pressable>
+            <View style={styles.inputs}>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>Title</Text>
+              <TextInput
+                style={{
+                  height: "60%",
+                  width: "100%",
+                  borderWidth: 2,
+                  borderColor: "#747474",
+                  paddingHorizontal: 10,
+                  backgroundColor: "white",
+                  borderRadius: 5,
+                }}
+                keyboardType="default"
+                value={title}
+                onChangeText={handleTitle}
+              />
+            </View>
+            <View style={styles.inputs}>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>Amount</Text>
+              <TextInput
+                style={{
+                  height: "60%",
+                  width: "100%",
+                  borderWidth: 2,
+                  borderColor: "#747474",
+                  paddingHorizontal: 10,
+                  backgroundColor: "white",
+                  borderRadius: 5,
+                }}
+                keyboardType="numeric"
+                value={amount}
+                returnKeyType="done"
+                onChangeText={handleAmount}
+              />
+            </View>
+            <View style={styles.inputs}>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>Date</Text>
+              <Pressable
+                style={{
+                  height: "60%",
+                  width: "100%",
+                  borderWidth: 2,
+                  borderColor: "#747474",
+                  paddingHorizontal: 10,
+                  backgroundColor: "white",
+                  borderRadius: 5,
+                  justifyContent: "center",
+                }}
+                onPress={handleDateSelector}
+              >
+                <Text>{!date ? "-- Select a Date --" : date}</Text>
+              </Pressable>
+              <Modal animationType="fade" transparent={true} visible={openDate}>
+                <View style={styles.centeredView}>
+                  <View style={styles.dateSelector}>
+                    <DatePicker
+                      mode="calendar"
+                      minimumDate={minimumDate}
+                      current={current}
+                      onSelectedChange={handleDateChange}
+                    />
+                    <Pressable onPress={handleDateSelector}>
+                      <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                        Close
+                      </Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
-            </Modal>
-          </View>
-          <View style={styles.inputs}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Recurring</Text>
-            <Switch onValueChange={handleSwitch} value={isRecurring} />
-          </View>
-          <View style={styles.inputs}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Type</Text>
-            <DropDownPicker
+              </Modal>
+            </View>
+            <View style={styles.inputs}>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                Recurring
+              </Text>
+              <Switch onValueChange={handleSwitch} value={isRecurring} />
+            </View>
+            <View style={styles.inputs}>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>Type</Text>
+              <DropDownPicker
+                style={{
+                  height: "60%",
+                  width: "100%",
+                  borderWidth: 2,
+                  borderColor: "#747474",
+                  backgroundColor: "white",
+                }}
+                open={openType}
+                value={typeValue}
+                items={types}
+                setOpen={setOpenType}
+                setValue={setTypeValue}
+              />
+            </View>
+            <View
               style={{
-                height: "60%",
+                position: "absolute",
+                height: "10%",
                 width: "100%",
-                borderWidth: 2,
-                borderColor: "#747474",
-                backgroundColor: "white",
-              }}
-              open={openType}
-              value={typeValue}
-              items={types}
-              setOpen={setOpenType}
-              setValue={setTypeValue}
-            />
-          </View>
-          <View
-            style={{
-              position: "absolute",
-              height: "10%",
-              width: "100%",
-              bottom: 30,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Pressable
-              style={{
-                height: "100%",
-                width: "60%",
-                borderRadius: 20,
-                backgroundColor: "#3E859A",
+                bottom: 30,
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              onPress={handleSubmit}
             >
-              <Text
-                style={{ color: "white", fontSize: 20, fontWeight: "bold" }}
+              <Pressable
+                style={{
+                  height: "100%",
+                  width: "60%",
+                  borderRadius: 20,
+                  backgroundColor: "#3E859A",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onPress={handleSubmit}
               >
-                Add Item
-              </Text>
-            </Pressable>
+                <Text
+                  style={{ color: "white", fontSize: 20, fontWeight: "bold" }}
+                >
+                  Add Item
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
+      )}
     </Modal>
   );
 }
@@ -299,5 +346,16 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#3E859A",
   },
 });
