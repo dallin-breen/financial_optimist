@@ -10,6 +10,8 @@ import {
   Pressable,
 } from "react-native";
 import AddData from "./AddData";
+import { getDocs, collection, where, query } from "firebase/firestore";
+import { FIRESTORE_DB } from "../../firebase";
 
 export default function MonthData({ userId, month, year }) {
   const selectedMonth = convertMonthToInt(month);
@@ -20,8 +22,41 @@ export default function MonthData({ userId, month, year }) {
   const [canAdd, setCanAdd] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const db = FIRESTORE_DB;
 
   useEffect(() => {
+    async function getIncomeDataFirestore() {
+      let startDate = new Date(selectedYear, selectedMonth - 1, 1);
+      let endDate = new Date(selectedYear, selectedMonth, 1);
+      try {
+        let q = query(
+          collection(db, "users", userId, "incomes"),
+          where("date", ">=", startDate),
+          where("date", "<", endDate)
+        );
+        const incomeSnapshot = await getDocs(q);
+        incomeSnapshot.forEach((doc) => {
+          console.log(doc.id, " => ", doc.data());
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    // async function getExpenseDataFirestore() {
+    //   try {
+    //     let q = query(collection(db, "users", userId, "expenses"));
+    //     const expenseSnapshot = await getDocs(q);
+    //     expenseSnapshot.forEach((doc) => {
+    //       console.log(doc.id, " => ", doc.data());
+    //     });
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+    //   }
+    // }
+    getIncomeDataFirestore();
+    // getExpenseDataFirestore();
+
     if (selectedMonth < currentMonth && selectedYear <= currentYear) {
       setCanAdd(false);
     } else {

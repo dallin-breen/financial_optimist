@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import DatePicker from "react-native-modern-datepicker";
 import DropDownPicker from "react-native-dropdown-picker";
-import { doc, addDoc, collection } from "firebase/firestore";
+import { doc, addDoc, collection, Timestamp } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
 export default function AddData({ userId, visible, close, month, year }) {
@@ -21,6 +21,7 @@ export default function AddData({ userId, visible, close, month, year }) {
   const [amount, setAmount] = useState("$ 0.00");
   const [openDate, setOpenDate] = useState(false);
   const [date, setDate] = useState(null);
+  const [dateTimestamp, setDateTimestamp] = useState(null);
   const [minimumDate, setMinimumDate] = useState(null);
   const [current, setCurrent] = useState(null);
   const [openType, setOpenType] = useState(false);
@@ -69,7 +70,7 @@ export default function AddData({ userId, visible, close, month, year }) {
     setOpenDate(!openDate);
   }
 
-  function handleDateChange(selectedDate) {
+  const handleDateChange = useCallback((selectedDate) => {
     const months = [
       "January",
       "February",
@@ -97,8 +98,10 @@ export default function AddData({ userId, visible, close, month, year }) {
 
     let formattedDate = `${monthName} ${dayOfMonth}, ${yearString}`;
 
+    setDateTimestamp(new Date(year, month - 1, day));
+
     setDate(formattedDate);
-  }
+  }, []);
 
   function handleSwitch() {
     setIsRecurring((previousState) => !previousState);
@@ -138,6 +141,7 @@ export default function AddData({ userId, visible, close, month, year }) {
       amount: amount,
       date: date,
       recurring: isRecurring,
+      dateTimestamp: dateTimestamp,
     };
 
     if (typeValue === "Income") {
@@ -173,7 +177,7 @@ export default function AddData({ userId, visible, close, month, year }) {
     <Modal visible={visible} animationType="slide" transparent={true}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3E859A" />
+          <ActivityIndicator size="large" color="white" />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       ) : (
@@ -356,6 +360,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#3E859A",
+    color: "white",
   },
 });
