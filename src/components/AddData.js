@@ -21,6 +21,8 @@ export default function AddData({ userId, visible, close, month, year }) {
   const [amount, setAmount] = useState("$ 0.00");
   const [openDate, setOpenDate] = useState(false);
   const [date, setDate] = useState(null);
+  const [dateMonth, setDateMonth] = useState(null);
+  const [dateYear, setDateYear] = useState(null);
   const [dateTimestamp, setDateTimestamp] = useState(null);
   const [minimumDate, setMinimumDate] = useState(null);
   const [current, setCurrent] = useState(null);
@@ -86,6 +88,16 @@ export default function AddData({ userId, visible, close, month, year }) {
       "December",
     ];
 
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
     let [year, month, day] = selectedDate.split("/");
 
     let dateObject = new Date(year, month - 1, day);
@@ -96,11 +108,14 @@ export default function AddData({ userId, visible, close, month, year }) {
 
     let yearString = dateObject.getFullYear();
 
-    let formattedDate = `${monthName} ${dayOfMonth}, ${yearString}`;
+    let itemDate = days[new Date(year, month - 1, day).getDay()];
 
-    setDateTimestamp(new Date(year, month - 1, day));
+    let formattedDate = `${itemDate}, ${monthName} ${dayOfMonth}, ${yearString}`;
 
     setDate(formattedDate);
+    setDateMonth(monthName);
+    setDateYear(yearString);
+    setDateTimestamp(new Date(year, month - 1, day));
   }, []);
 
   function handleSwitch() {
@@ -140,8 +155,10 @@ export default function AddData({ userId, visible, close, month, year }) {
       title: title,
       amount: amount,
       date: date,
+      month: dateMonth,
+      year: dateYear,
       recurring: isRecurring,
-      dateTimestamp: dateTimestamp,
+      // dateTimestamp: Timestamp.fromDate(dateTimestamp),
     };
 
     if (typeValue === "Income") {

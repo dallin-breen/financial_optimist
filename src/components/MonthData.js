@@ -10,7 +10,15 @@ import {
   Pressable,
 } from "react-native";
 import AddData from "./AddData";
-import { getDocs, collection, where, query } from "firebase/firestore";
+import {
+  getDocs,
+  getDoc,
+  doc,
+  collection,
+  where,
+  query,
+  deleteDoc,
+} from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
 export default function MonthData({ userId, month, year }) {
@@ -19,6 +27,9 @@ export default function MonthData({ userId, month, year }) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
+  const [income, setIncome] = useState({});
+  const [expense, setExpense] = useState({});
+
   const [canAdd, setCanAdd] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -26,36 +37,48 @@ export default function MonthData({ userId, month, year }) {
 
   useEffect(() => {
     async function getIncomeDataFirestore() {
-      let startDate = new Date(selectedYear, selectedMonth - 1, 1);
-      let endDate = new Date(selectedYear, selectedMonth, 1);
       try {
         let q = query(
           collection(db, "users", userId, "incomes"),
-          where("date", ">=", startDate),
-          where("date", "<", endDate)
+          where("month", "==", month),
+          where("year", "==", year)
         );
         const incomeSnapshot = await getDocs(q);
+
+        const newIncome = {};
+
         incomeSnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data());
+          const incomeData = doc.data();
+          newIncome[doc.id] = incomeData;
         });
+        setIncome(newIncome);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
 
-    // async function getExpenseDataFirestore() {
-    //   try {
-    //     let q = query(collection(db, "users", userId, "expenses"));
-    //     const expenseSnapshot = await getDocs(q);
-    //     expenseSnapshot.forEach((doc) => {
-    //       console.log(doc.id, " => ", doc.data());
-    //     });
-    //   } catch (error) {
-    //     console.error("Error fetching data:", error);
-    //   }
-    // }
+    async function getExpenseDataFirestore() {
+      try {
+        let q = query(
+          collection(db, "users", userId, "expenses"),
+          where("month", "==", month),
+          where("year", "==", year)
+        );
+        const expenseSnapshot = await getDocs(q);
+
+        const newExpense = {};
+
+        expenseSnapshot.forEach((doc) => {
+          const expenseData = doc.data();
+          newExpense[doc.id] = expenseData;
+        });
+        setExpense(newExpense);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
     getIncomeDataFirestore();
-    // getExpenseDataFirestore();
+    getExpenseDataFirestore();
 
     if (selectedMonth < currentMonth && selectedYear <= currentYear) {
       setCanAdd(false);
@@ -67,8 +90,51 @@ export default function MonthData({ userId, month, year }) {
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
+      async function getIncomeDataFirestore() {
+        try {
+          let q = query(
+            collection(db, "users", userId, "incomes"),
+            where("month", "==", month),
+            where("year", "==", year)
+          );
+          const incomeSnapshot = await getDocs(q);
+
+          const newIncome = {};
+
+          incomeSnapshot.forEach((doc) => {
+            const incomeData = doc.data();
+            newIncome[doc.id] = incomeData;
+          });
+          setIncome(newIncome);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      async function getExpenseDataFirestore() {
+        try {
+          let q = query(
+            collection(db, "users", userId, "expenses"),
+            where("month", "==", month),
+            where("year", "==", year)
+          );
+          const expenseSnapshot = await getDocs(q);
+
+          const newExpense = {};
+
+          expenseSnapshot.forEach((doc) => {
+            const expenseData = doc.data();
+            newExpense[doc.id] = expenseData;
+          });
+          setExpense(newExpense);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+      getIncomeDataFirestore();
+      getExpenseDataFirestore();
       setRefreshing(false);
-    }, 2000);
+    }, 5000);
   }, []);
 
   function openModal() {
@@ -97,6 +163,44 @@ export default function MonthData({ userId, month, year }) {
 
     let monthNumber = months[month];
     return monthNumber;
+  }
+
+  async function handleDelete(itemType, docId) {
+    if (itemType === "incomes") {
+      try {
+        let docReference = doc(db, "users", userId, itemType, docId);
+        const documentSnapshot = await getDoc(docReference);
+        if (documentSnapshot.exists()) {
+          await deleteDoc(docReference);
+          setIncome((prevIncome) => {
+            let newIncome = { ...prevIncome };
+            delete newIncome[docId];
+            return newIncome;
+          });
+        }
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+        return;
+      }
+    }
+
+    if (itemType === "expenses") {
+      try {
+        let docReference = doc(db, "users", userId, itemType, docId);
+        const documentSnapshot = await getDoc(docReference);
+        if (documentSnapshot.exists()) {
+          await deleteDoc(docReference);
+          setExpense((prevExpense) => {
+            let newExpense = { ...prevExpense };
+            delete newExpense[docId];
+            return newExpense;
+          });
+        }
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+        return;
+      }
+    }
   }
 
   return (
@@ -130,38 +234,105 @@ export default function MonthData({ userId, month, year }) {
         }
         showsVerticalScrollIndicator={false}
       >
-        {/* <View style={styles.item}>
-          <View style={styles.itemDate}>
+        {Object.keys(income).length > 0 && (
+          <View style={styles.typeName}>
             <Text
               style={{
-                fontSize: 20,
-                color: "white",
+                fontSize: 22,
+                color: "black",
                 fontWeight: "bold",
-                alignSelf: "center",
               }}
             >
-              Monday, January 1st, 2023
+              Incomes
             </Text>
-            <Entypo
-              name="circle-with-minus"
-              size={24}
-              color={"black"}
-              onPress={() => Alert.alert("Remove Info")}
-            />
           </View>
-          <View style={styles.itemLabels}>
-            <Text style={styles.columnOne}>Title</Text>
-            <Text style={styles.columnTwo}>Amount</Text>
-            <Text style={styles.columnThree}>Total</Text>
-          </View>
-          <Pressable onPress={() => Alert.alert("Selected Info")}>
-            <View style={styles.itemInfo}>
-              <Text style={styles.columnOne}>Target for supplies</Text>
-              <Text style={styles.columnTwo}>$20.00</Text>
-              <Text style={styles.columnThree}>$119,980.00</Text>
+        )}
+
+        {Object.keys(income).map((incomeId) => {
+          const incomeData = income[incomeId];
+          return (
+            <View key={incomeId} style={styles.item}>
+              <View style={styles.itemDate}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    color: "white",
+                    fontWeight: "bold",
+                    alignSelf: "center",
+                  }}
+                >
+                  {incomeData.date}
+                </Text>
+                <Entypo
+                  name="circle-with-minus"
+                  size={24}
+                  color={"black"}
+                  onPress={() => handleDelete("incomes", incomeId)}
+                />
+              </View>
+              <View style={styles.itemLabels}>
+                <Text style={styles.columnOne}>Title</Text>
+                <Text style={styles.columnTwo}>Amount</Text>
+                <Text style={styles.columnThree}>Total</Text>
+              </View>
+              <Pressable onPress={() => Alert.alert("Selected Info")}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.columnOne}>{incomeData.title}</Text>
+                  <Text style={styles.columnTwo}>{incomeData.amount}</Text>
+                </View>
+              </Pressable>
             </View>
-          </Pressable>
-        </View> */}
+          );
+        })}
+        {Object.keys(expense).length > 0 && (
+          <View style={styles.typeName}>
+            <Text
+              style={{
+                fontSize: 22,
+                color: "black",
+                fontWeight: "bold",
+              }}
+            >
+              Expenses
+            </Text>
+          </View>
+        )}
+        {Object.keys(expense).map((expenseId) => {
+          const expenseData = expense[expenseId];
+          return (
+            <View key={expenseId} style={styles.item}>
+              <View style={styles.itemDate}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    color: "white",
+                    fontWeight: "bold",
+                    alignSelf: "center",
+                  }}
+                >
+                  {expenseData.date}
+                </Text>
+                <Entypo
+                  name="circle-with-minus"
+                  size={24}
+                  color={"black"}
+                  onPress={() => handleDelete("expenses", expenseId)}
+                />
+              </View>
+              <View style={styles.itemLabels}>
+                <Text style={styles.columnOne}>Title</Text>
+                <Text style={styles.columnTwo}>Amount</Text>
+                <Text style={styles.columnThree}>Total</Text>
+              </View>
+              <Pressable onPress={() => Alert.alert("Selected Info")}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.columnOne}>{expenseData.title}</Text>
+                  <Text style={styles.columnTwo}>{expenseData.amount}</Text>
+                </View>
+              </Pressable>
+            </View>
+          );
+        })}
       </ScrollView>
       {modalIsOpen ? (
         <AddData
@@ -189,6 +360,10 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   addButton: {
+    marginBottom: 10,
+  },
+  typeName: {
+    alignSelf: "center",
     marginBottom: 10,
   },
   item: {
