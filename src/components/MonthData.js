@@ -136,7 +136,7 @@ export default function MonthData({ userId, month, year }) {
       getExpenseDataFirestore();
       setRefreshing(false);
     }, 5000);
-  }, []);
+  }, [month, year]);
 
   function openModal() {
     setModalIsOpen(true);
@@ -361,7 +361,12 @@ export default function MonthData({ userId, month, year }) {
               <Pressable
                 onPress={() => handleConfirmation("incomes", incomeId)}
               >
-                <View style={styles.itemInfo}>
+                <View
+                  style={[
+                    styles.itemInfo,
+                    incomeData.confirmed && styles.confirmedIncome,
+                  ]}
+                >
                   <Text style={styles.columnOne}>{incomeData.title}</Text>
                   <Text style={styles.columnTwo}>{incomeData.amount}</Text>
                 </View>
@@ -412,10 +417,27 @@ export default function MonthData({ userId, month, year }) {
               <Pressable
                 onPress={() => handleConfirmation("expenses", expenseId)}
               >
-                <View style={styles.itemInfo}>
-                  <Text style={styles.columnOne}>{expenseData.title}</Text>
-                  <Text style={styles.columnTwo}>{expenseData.amount}</Text>
-                </View>
+                {expenseData.recurring === false ? (
+                  <View
+                    style={[
+                      styles.itemInfo,
+                      expenseData.confirmed && styles.confirmedItem,
+                    ]}
+                  >
+                    <Text style={styles.columnOne}>{expenseData.title}</Text>
+                    <Text style={styles.columnTwo}>{expenseData.amount}</Text>
+                  </View>
+                ) : (
+                  <View
+                    style={[
+                      styles.itemInfo,
+                      expenseData.confirmed && styles.confirmedExpense,
+                    ]}
+                  >
+                    <Text style={styles.columnOne}>{expenseData.title}</Text>
+                    <Text style={styles.columnTwo}>{expenseData.amount}</Text>
+                  </View>
+                )}
               </Pressable>
             </View>
           );
@@ -499,5 +521,14 @@ const styles = StyleSheet.create({
   },
   columnThree: {
     width: "20%",
+  },
+  confirmedItem: {
+    backgroundColor: "yellow",
+  },
+  confirmedExpense: {
+    backgroundColor: "red",
+  },
+  confirmedIncome: {
+    backgroundColor: "green",
   },
 });
