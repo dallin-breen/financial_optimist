@@ -165,6 +165,7 @@ export default function AddData({
       month: dateMonth,
       year: dateYear,
       recurring: isRecurring,
+      confirmed: false,
       // dateTimestamp: Timestamp.fromDate(dateTimestamp),
     };
 

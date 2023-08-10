@@ -18,6 +18,7 @@ import {
   where,
   query,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
@@ -249,6 +250,42 @@ export default function MonthData({ userId, month, year }) {
     }
   }
 
+  async function handleConfirmation(itemType, docId) {
+    if (itemType === "incomes") {
+      try {
+        let docReference = doc(db, "users", userId, itemType, docId);
+        await updateDoc(docReference, {
+          confirmed: true,
+        });
+        setIncome((prevIncome) => {
+          let newIncome = { ...prevIncome };
+          newIncome[docId]["confirmed"] = true;
+          return newIncome;
+        });
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+        return;
+      }
+    }
+
+    if (itemType === "expenses") {
+      try {
+        let docReference = doc(db, "users", userId, itemType, docId);
+        await updateDoc(docReference, {
+          confirmed: true,
+        });
+        setExpense((prevExpense) => {
+          let newExpense = { ...prevExpense };
+          newExpense[docId]["confirmed"] = true;
+          return newExpense;
+        });
+      } catch (error) {
+        Alert.alert("Error", `${error}`);
+        return;
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.addButton}>
@@ -321,7 +358,9 @@ export default function MonthData({ userId, month, year }) {
                 <Text style={styles.columnTwo}>Amount</Text>
                 <Text style={styles.columnThree}>Total</Text>
               </View>
-              <Pressable onPress={() => Alert.alert("Selected Info")}>
+              <Pressable
+                onPress={() => handleConfirmation("incomes", incomeId)}
+              >
                 <View style={styles.itemInfo}>
                   <Text style={styles.columnOne}>{incomeData.title}</Text>
                   <Text style={styles.columnTwo}>{incomeData.amount}</Text>
@@ -370,7 +409,9 @@ export default function MonthData({ userId, month, year }) {
                 <Text style={styles.columnTwo}>Amount</Text>
                 <Text style={styles.columnThree}>Total</Text>
               </View>
-              <Pressable onPress={() => Alert.alert("Selected Info")}>
+              <Pressable
+                onPress={() => handleConfirmation("expenses", expenseId)}
+              >
                 <View style={styles.itemInfo}>
                   <Text style={styles.columnOne}>{expenseData.title}</Text>
                   <Text style={styles.columnTwo}>{expenseData.amount}</Text>
