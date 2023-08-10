@@ -165,6 +165,52 @@ export default function MonthData({ userId, month, year }) {
     return monthNumber;
   }
 
+  function reloadOnDataAdd() {
+    async function getIncomeDataFirestore() {
+      try {
+        let q = query(
+          collection(db, "users", userId, "incomes"),
+          where("month", "==", month),
+          where("year", "==", year)
+        );
+        const incomeSnapshot = await getDocs(q);
+
+        const newIncome = {};
+
+        incomeSnapshot.forEach((doc) => {
+          const incomeData = doc.data();
+          newIncome[doc.id] = incomeData;
+        });
+        setIncome(newIncome);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    async function getExpenseDataFirestore() {
+      try {
+        let q = query(
+          collection(db, "users", userId, "expenses"),
+          where("month", "==", month),
+          where("year", "==", year)
+        );
+        const expenseSnapshot = await getDocs(q);
+
+        const newExpense = {};
+
+        expenseSnapshot.forEach((doc) => {
+          const expenseData = doc.data();
+          newExpense[doc.id] = expenseData;
+        });
+        setExpense(newExpense);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    getIncomeDataFirestore();
+    getExpenseDataFirestore();
+  }
+
   async function handleDelete(itemType, docId) {
     if (itemType === "incomes") {
       try {
@@ -341,6 +387,7 @@ export default function MonthData({ userId, month, year }) {
           close={closeModal}
           month={selectedMonth}
           year={selectedYear}
+          reload={reloadOnDataAdd}
         />
       ) : null}
     </View>

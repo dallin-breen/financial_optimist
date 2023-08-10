@@ -16,7 +16,14 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { doc, addDoc, collection, Timestamp } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
-export default function AddData({ userId, visible, close, month, year }) {
+export default function AddData({
+  userId,
+  visible,
+  close,
+  month,
+  year,
+  reload,
+}) {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("$ 0.00");
   const [openDate, setOpenDate] = useState(false);
@@ -168,6 +175,7 @@ export default function AddData({ userId, visible, close, month, year }) {
         let colRef = collection(docRef, "incomes");
         await addDoc(colRef, inputData);
         close();
+        reload();
       } catch (error) {
         Alert.alert("Error", `${error}`);
         return;
@@ -181,6 +189,7 @@ export default function AddData({ userId, visible, close, month, year }) {
         let colRef = collection(docRef, "expenses");
         await addDoc(colRef, inputData);
         close();
+        reload();
       } catch (error) {
         Alert.alert("Error", `${error}`);
         return;
