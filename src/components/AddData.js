@@ -143,7 +143,7 @@ export default function AddData({
     if (!/^(\$ )?(\d{1,3}(,\d{3})*|(\d+))(\.\d{2})?$/.test(amount)) {
       Alert.alert(
         "Error",
-        "Please enter your budget in the correct form (ex. $1.25 or $1,234.56)"
+        "Please enter your budget in the correct form (ex. $1.25 or $1234.56)"
       );
       return;
     }

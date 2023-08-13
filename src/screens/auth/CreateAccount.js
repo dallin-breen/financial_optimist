@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
   View,
@@ -17,18 +17,39 @@ import {
   sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, addDoc } from "firebase/firestore";
 
 export default function CreateAccount() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [budget, setBudget] = useState("$ 0.00");
+  const [budget, setBudget] = useState(null);
   const auth = FIREBASE_AUTH;
   const db = FIRESTORE_DB;
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
+
+  const [currentYear, setCurrentYear] = useState(null);
+  const months = [
+    { id: 1, name: "January" },
+    { id: 2, name: "February" },
+    { id: 3, name: "March" },
+    { id: 4, name: "April" },
+    { id: 5, name: "May" },
+    { id: 6, name: "June" },
+    { id: 7, name: "July" },
+    { id: 8, name: "August" },
+    { id: 9, name: "September" },
+    { id: 10, name: "October" },
+    { id: 11, name: "November" },
+    { id: 12, name: "December" },
+  ];
+
+  useEffect(() => {
+    const year = new Date().getFullYear();
+    setCurrentYear(year);
+  }, []);
 
   function setUserName(text) {
     setName(text);
@@ -48,8 +69,7 @@ export default function CreateAccount() {
 
   function setStartingBudget(text) {
     let numericValue = text.replace(/[^0-9.,]/g, "");
-    const valueWithSign = "$ " + numericValue;
-    setBudget(valueWithSign);
+    setBudget(numericValue);
   }
 
   async function handleSubmit() {
@@ -83,15 +103,15 @@ export default function CreateAccount() {
       return;
     }
 
-    if (budget === "$ " || budget === "$ 0.00") {
+    if (budget === null) {
       Alert.alert("Error", "Please enter your balance");
       return;
     }
 
-    if (!/^(\$ )?(\d{1,3}(,\d{3})*|(\d+))(\.\d{2})?$/.test(budget)) {
+    if (!/^(\d{1,3}(,\d{3})*|(\d+))(\.\d{2})?$/.test(budget)) {
       Alert.alert(
         "Error",
-        "Please enter your budget in the correct form (ex. $1.25 or $1,234.56)"
+        "Please enter your budget in the correct form (ex. $1.25 or $1234.56)"
       );
       return;
     }
@@ -111,8 +131,22 @@ export default function CreateAccount() {
 
       await setDoc(doc(db, "users", user.uid), {
         name: name,
-        budget: budget,
       });
+
+      try {
+        let docRef = doc(db, "users", user.uid);
+        let colRef = collection(docRef, `${currentYear}`);
+
+        for (let i = 0; i < months.length; i++) {
+          await addDoc(colRef, {
+            month: months[i].name,
+            budget: parseFloat(budget),
+          });
+        }
+      } catch (error) {
+        Alert.alert("Error", "Something happened during account creation");
+        return;
+      }
 
       await sendEmailVerification(user);
 
@@ -137,7 +171,7 @@ export default function CreateAccount() {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      setBudget("$ 0.00");
+      setBudget(null);
       setLoading(false);
     }
   }
@@ -234,21 +268,24 @@ export default function CreateAccount() {
             <Text style={{ fontSize: 17, fontWeight: "bold" }}>
               Set Starting Budget
             </Text>
-            <TextInput
-              style={{
-                height: "60%",
-                width: "100%",
-                borderWidth: 2,
-                borderColor: "#747474",
-                paddingHorizontal: 10,
-                backgroundColor: "white",
-                borderRadius: 50,
-              }}
-              keyboardType="numeric"
-              value={budget}
-              returnKeyType="done"
-              onChangeText={setStartingBudget}
-            />
+            <View style={styles.budgetInput}>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>$</Text>
+              <TextInput
+                style={{
+                  width: "90%",
+                  height: "100%",
+                  borderWidth: 2,
+                  borderColor: "#747474",
+                  paddingHorizontal: 10,
+                  backgroundColor: "white",
+                  borderRadius: 50,
+                }}
+                keyboardType="decimal-pad"
+                value={budget}
+                returnKeyType="done"
+                onChangeText={setStartingBudget}
+              />
+            </View>
           </View>
         </View>
         <View
@@ -304,6 +341,12 @@ const styles = StyleSheet.create({
     width: "75%",
     height: "10%",
     marginBottom: "5%",
+    justifyContent: "space-between",
+  },
+  budgetInput: {
+    flexDirection: "row",
+    height: "60%",
+    alignItems: "center",
     justifyContent: "space-between",
   },
 });
