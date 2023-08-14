@@ -9,12 +9,15 @@ import {
   KeyboardAvoidingView,
   Alert,
   ScrollView,
-  // Image,
-  // TextInput,
-  // TouchableOpacity,
-  // FlatList,
 } from "react-native";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import MonthData from "../../components/MonthData";
 // import { useNavigation, useRoute } from "@react-navigation/native";
 
@@ -22,6 +25,7 @@ const auth = FIREBASE_AUTH;
 const db = FIRESTORE_DB;
 
 export default function Home() {
+  const [hasCurrentYear, setHasCurrentYear] = useState(null);
   const [currentYear, setCurrentYear] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentBudget, setCurrentBudget] = useState(null);
@@ -45,122 +49,171 @@ export default function Home() {
     const year = new Date().getFullYear();
     setCurrentYear(year);
     const month = new Date().getMonth();
-    setSelectedMonth(months[month].name);
 
     async function getUserInfo() {
       const docRef = doc(db, "users", auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
       setCurrentUser(docSnap.data().name);
-      setCurrentBudget(docSnap.data().budget);
+
+      const colSnap = await getDocs(
+        collection(db, "users", auth.currentUser.uid, `${year}`)
+      );
+
+      if (colSnap.size > 0) {
+        setHasCurrentYear(true);
+        let q = query(
+          collection(db, "users", auth.currentUser.uid, `${year}`),
+          where("month", "==", months[month].name)
+        );
+
+        let querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          let monthData = { id: doc.id, data: doc.data() };
+          setSelectedMonth(monthData);
+          setCurrentBudget(monthData.data.budget);
+        });
+      } else {
+        setHasCurrentYear(false);
+      }
     }
+
     getUserInfo();
   }, []);
 
-  function handleMonthSelection(month) {
-    if (selectedMonth && selectedMonth === month) {
-      setSelectedMonth(null);
+  async function handleMonthSelection(month) {
+    if (selectedMonth.data.month === month) {
+      return;
     } else {
-      setSelectedMonth(month);
+      let q = query(
+        collection(db, "users", auth.currentUser.uid, `${currentYear}`),
+        where("month", "==", month)
+      );
+
+      let querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        let monthData = { id: doc.id, data: doc.data() };
+        setSelectedMonth(monthData);
+        setCurrentBudget(monthData.data.budget);
+      });
     }
+  }
+
+  function handlePrevYear() {
+    Alert.alert("Selected Previous Year");
+    return;
+  }
+
+  function handleNextYear() {
+    Alert.alert("Selected Next Year");
+    return;
   }
 
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <View style={styles.main}>
-        <View style={styles.nameBar}>
-          <View>
-            <Entypo
-              name="cog"
-              size={24}
-              color={"#3E859A"}
-              onPress={() => Alert.alert("Settings", "Settings were pressed!")}
-            />
+      {!hasCurrentYear ? null : !selectedMonth ? null : (
+        <View style={styles.main}>
+          <View style={styles.nameBar}>
+            <View>
+              <Entypo
+                name="cog"
+                size={24}
+                color={"#3E859A"}
+                onPress={() =>
+                  Alert.alert("Settings", "Settings were pressed!")
+                }
+              />
+            </View>
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                {currentUser || "Loading..."}
+              </Text>
+            </View>
+            <View>
+              <Entypo
+                name="log-out"
+                size={24}
+                color={"#3E859A"}
+                onPress={() => auth.signOut()}
+              />
+            </View>
           </View>
-          <View>
+          <View style={styles.budgetBar}>
             <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-              {currentUser || "Loading..."}
+              {`${selectedMonth.data.month} Total`}
+            </Text>
+            <Text style={{ fontSize: 30, fontWeight: "bold" }}>
+              {`$ ${currentBudget}`}
             </Text>
           </View>
-          <View>
-            <Entypo
-              name="log-out"
-              size={24}
-              color={"#3E859A"}
-              onPress={() => auth.signOut()}
-            />
+          <View style={styles.yearBar}>
+            <View>
+              <Entypo
+                name="arrow-bold-left"
+                size={24}
+                color={"white"}
+                onPress={handlePrevYear}
+              />
+            </View>
+            <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>
+              {currentYear}
+            </Text>
+            <View>
+              <Entypo
+                name="arrow-bold-right"
+                size={24}
+                color={"white"}
+                onPress={handleNextYear}
+              />
+            </View>
           </View>
-        </View>
-        <View style={styles.budgetBar}>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-            Your Total Balance
-          </Text>
-          <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-            {currentBudget || "Loading..."}
-          </Text>
-        </View>
-        <View style={styles.yearBar}>
-          <View>
-            <Entypo
-              name="arrow-bold-left"
-              size={24}
-              color={"white"}
-              onPress={() => setCurrentYear(currentYear - 1)}
-            />
+          <View style={styles.monthBarContainer}>
+            <ScrollView
+              style={styles.monthBar}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+            >
+              {months.map((month) => (
+                <View
+                  style={[
+                    styles.monthItem,
+                    selectedMonth.data.month === month.name &&
+                      styles.selectedMonthItem,
+                  ]}
+                  key={month.id}
+                >
+                  <Pressable onPress={() => handleMonthSelection(month.name)}>
+                    <Text
+                      style={[
+                        styles.monthText,
+                        selectedMonth.data.month === month.name &&
+                          styles.selectedMonthText,
+                      ]}
+                    >
+                      {month.name}
+                    </Text>
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
           </View>
-          <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>
-            {currentYear}
-          </Text>
-          <View>
-            <Entypo
-              name="arrow-bold-right"
-              size={24}
-              color={"white"}
-              onPress={() => setCurrentYear(currentYear + 1)}
+          {selectedMonth ? (
+            <MonthData
+              userId={auth.currentUser.uid}
+              monthId={selectedMonth.id}
+              month={selectedMonth.data.month}
+              year={currentYear}
             />
-          </View>
-        </View>
-        <View style={styles.monthBarContainer}>
-          <ScrollView
-            style={styles.monthBar}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-          >
-            {months.map((month) => (
-              <View
-                style={[
-                  styles.monthItem,
-                  selectedMonth === month.name && styles.selectedMonthItem,
-                ]}
-                key={month.id}
+          ) : (
+            <View style={styles.instructions}>
+              <Text
+                style={{ fontSize: 22, fontWeight: "bold", color: "black" }}
               >
-                <Pressable onPress={() => handleMonthSelection(month.name)}>
-                  <Text
-                    style={[
-                      styles.monthText,
-                      selectedMonth === month.name && styles.selectedMonthText,
-                    ]}
-                  >
-                    {month.name}
-                  </Text>
-                </Pressable>
-              </View>
-            ))}
-          </ScrollView>
+                Select the month you want to view
+              </Text>
+            </View>
+          )}
         </View>
-        {selectedMonth ? (
-          <MonthData
-            userId={auth.currentUser.uid}
-            month={selectedMonth}
-            year={currentYear}
-          />
-        ) : (
-          <View style={styles.instructions}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "black" }}>
-              Select the month you want to view
-            </Text>
-          </View>
-        )}
-      </View>
+      )}
     </KeyboardAvoidingView>
   );
 }

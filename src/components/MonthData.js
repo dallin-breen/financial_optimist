@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
-export default function MonthData({ userId, month, year }) {
+export default function MonthData({ userId, monthId, month, year }) {
   const selectedMonth = convertMonthToInt(month);
   const selectedYear = year;
   const currentMonth = new Date().getMonth() + 1;
@@ -40,9 +40,7 @@ export default function MonthData({ userId, month, year }) {
     async function getIncomeDataFirestore() {
       try {
         let q = query(
-          collection(db, "users", userId, "incomes"),
-          where("month", "==", month),
-          where("year", "==", year)
+          collection(db, "users", userId, `${selectedYear}`, monthId, "incomes")
         );
         const incomeSnapshot = await getDocs(q);
 
@@ -61,9 +59,14 @@ export default function MonthData({ userId, month, year }) {
     async function getExpenseDataFirestore() {
       try {
         let q = query(
-          collection(db, "users", userId, "expenses"),
-          where("month", "==", month),
-          where("year", "==", year)
+          collection(
+            db,
+            "users",
+            userId,
+            `${selectedYear}`,
+            monthId,
+            "expenses"
+          )
         );
         const expenseSnapshot = await getDocs(q);
 
@@ -94,9 +97,14 @@ export default function MonthData({ userId, month, year }) {
       async function getIncomeDataFirestore() {
         try {
           let q = query(
-            collection(db, "users", userId, "incomes"),
-            where("month", "==", month),
-            where("year", "==", year)
+            collection(
+              db,
+              "users",
+              userId,
+              `${selectedYear}`,
+              monthId,
+              "incomes"
+            )
           );
           const incomeSnapshot = await getDocs(q);
 
@@ -115,9 +123,14 @@ export default function MonthData({ userId, month, year }) {
       async function getExpenseDataFirestore() {
         try {
           let q = query(
-            collection(db, "users", userId, "expenses"),
-            where("month", "==", month),
-            where("year", "==", year)
+            collection(
+              db,
+              "users",
+              userId,
+              `${selectedYear}`,
+              monthId,
+              "expenses"
+            )
           );
           const expenseSnapshot = await getDocs(q);
 
@@ -170,9 +183,7 @@ export default function MonthData({ userId, month, year }) {
     async function getIncomeDataFirestore() {
       try {
         let q = query(
-          collection(db, "users", userId, "incomes"),
-          where("month", "==", month),
-          where("year", "==", year)
+          collection(db, "users", userId, `${selectedYear}`, monthId, "incomes")
         );
         const incomeSnapshot = await getDocs(q);
 
@@ -191,9 +202,14 @@ export default function MonthData({ userId, month, year }) {
     async function getExpenseDataFirestore() {
       try {
         let q = query(
-          collection(db, "users", userId, "expenses"),
-          where("month", "==", month),
-          where("year", "==", year)
+          collection(
+            db,
+            "users",
+            userId,
+            `${selectedYear}`,
+            monthId,
+            "expenses"
+          )
         );
         const expenseSnapshot = await getDocs(q);
 
@@ -215,7 +231,15 @@ export default function MonthData({ userId, month, year }) {
   async function handleDelete(itemType, docId) {
     if (itemType === "incomes") {
       try {
-        let docReference = doc(db, "users", userId, itemType, docId);
+        let docReference = doc(
+          db,
+          "users",
+          userId,
+          `${selectedYear}`,
+          monthId,
+          itemType,
+          docId
+        );
         const documentSnapshot = await getDoc(docReference);
         if (documentSnapshot.exists()) {
           await deleteDoc(docReference);
@@ -233,7 +257,15 @@ export default function MonthData({ userId, month, year }) {
 
     if (itemType === "expenses") {
       try {
-        let docReference = doc(db, "users", userId, itemType, docId);
+        let docReference = doc(
+          db,
+          "users",
+          userId,
+          `${selectedYear}`,
+          monthId,
+          itemType,
+          docId
+        );
         const documentSnapshot = await getDoc(docReference);
         if (documentSnapshot.exists()) {
           await deleteDoc(docReference);
@@ -253,7 +285,15 @@ export default function MonthData({ userId, month, year }) {
   async function handleConfirmation(itemType, docId) {
     if (itemType === "incomes") {
       try {
-        let docReference = doc(db, "users", userId, itemType, docId);
+        let docReference = doc(
+          db,
+          "users",
+          userId,
+          `${selectedYear}`,
+          monthId,
+          itemType,
+          docId
+        );
         await updateDoc(docReference, {
           confirmed: true,
         });
@@ -270,7 +310,15 @@ export default function MonthData({ userId, month, year }) {
 
     if (itemType === "expenses") {
       try {
-        let docReference = doc(db, "users", userId, itemType, docId);
+        let docReference = doc(
+          db,
+          "users",
+          userId,
+          `${selectedYear}`,
+          monthId,
+          itemType,
+          docId
+        );
         await updateDoc(docReference, {
           confirmed: true,
         });
@@ -446,6 +494,7 @@ export default function MonthData({ userId, month, year }) {
       {modalIsOpen ? (
         <AddData
           userId={userId}
+          monthId={monthId}
           visible={modalIsOpen}
           close={closeModal}
           month={selectedMonth}

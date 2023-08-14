@@ -18,14 +18,16 @@ import { FIRESTORE_DB } from "../../firebase";
 
 export default function AddData({
   userId,
+  monthId,
   visible,
   close,
   month,
   year,
   reload,
 }) {
+  console.log(month);
   const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("$ 0.00");
+  const [amount, setAmount] = useState(null);
   const [openDate, setOpenDate] = useState(false);
   const [date, setDate] = useState(null);
   const [dateMonth, setDateMonth] = useState(null);
@@ -63,7 +65,7 @@ export default function AddData({
 
     setMinimumDate(`${minimumYear}/${minimumMonth}/${minimumDay}`);
     setCurrent(`${year}/${month}/${minimumDay}`);
-  }, []);
+  }, [month, year]);
 
   function handleTitle(text) {
     setTitle(text);
@@ -71,8 +73,7 @@ export default function AddData({
 
   function handleAmount(text) {
     let numericValue = text.replace(/[^0-9.,]/g, "");
-    const valueWithSign = "$ " + numericValue;
-    setAmount(valueWithSign);
+    setAmount(numericValue);
   }
 
   function handleDateSelector() {
@@ -135,7 +136,7 @@ export default function AddData({
       return;
     }
 
-    if (amount === "$ " || amount === "$ 0.00") {
+    if (amount === null) {
       Alert.alert("Error", "Please enter your amount");
       return;
     }
@@ -160,10 +161,10 @@ export default function AddData({
 
     const inputData = {
       title: title,
-      amount: amount,
+      amount: parseFloat(amount),
       date: date,
-      month: dateMonth,
-      year: dateYear,
+      // month: dateMonth,
+      // year: dateYear,
       recurring: isRecurring,
       confirmed: false,
       // dateTimestamp: Timestamp.fromDate(dateTimestamp),
@@ -172,7 +173,7 @@ export default function AddData({
     if (typeValue === "Income") {
       try {
         setLoading(true);
-        let docRef = doc(db, "users", userId);
+        let docRef = doc(db, "users", userId, `${dateYear}`, monthId);
         let colRef = collection(docRef, "incomes");
         await addDoc(colRef, inputData);
         close();
@@ -186,7 +187,7 @@ export default function AddData({
     } else {
       try {
         setLoading(true);
-        let docRef = doc(db, "users", userId);
+        let docRef = doc(db, "users", userId, `${dateYear}`, monthId);
         let colRef = collection(docRef, "expenses");
         await addDoc(colRef, inputData);
         close();
@@ -235,21 +236,24 @@ export default function AddData({
             </View>
             <View style={styles.inputs}>
               <Text style={{ fontSize: 17, fontWeight: "bold" }}>Amount</Text>
-              <TextInput
-                style={{
-                  height: "60%",
-                  width: "100%",
-                  borderWidth: 2,
-                  borderColor: "#747474",
-                  paddingHorizontal: 10,
-                  backgroundColor: "white",
-                  borderRadius: 5,
-                }}
-                keyboardType="numeric"
-                value={amount}
-                returnKeyType="done"
-                onChangeText={handleAmount}
-              />
+              <View style={styles.amountInput}>
+                <Text style={{ fontSize: 17, fontWeight: "bold" }}>$</Text>
+                <TextInput
+                  style={{
+                    height: "100%",
+                    width: "90%",
+                    borderWidth: 2,
+                    borderColor: "#747474",
+                    paddingHorizontal: 10,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  }}
+                  keyboardType="decimal-pad"
+                  value={amount}
+                  returnKeyType="done"
+                  onChangeText={handleAmount}
+                />
+              </View>
             </View>
             <View style={styles.inputs}>
               <Text style={{ fontSize: 17, fontWeight: "bold" }}>Date</Text>
@@ -363,6 +367,12 @@ const styles = StyleSheet.create({
     width: "75%",
     height: "10%",
     marginBottom: "5%",
+    justifyContent: "space-between",
+  },
+  amountInput: {
+    flexDirection: "row",
+    height: "60%",
+    alignItems: "center",
     justifyContent: "space-between",
   },
   centeredView: {
