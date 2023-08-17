@@ -474,6 +474,7 @@ export default function MonthData({ userId, monthId, month, year }) {
                   >
                     <Text style={styles.columnOne}>{expenseData.title}</Text>
                     <Text style={styles.columnTwo}>{expenseData.amount}</Text>
+                    <Text style={styles.columnThree}>4000</Text>
                   </View>
                 ) : (
                   <View

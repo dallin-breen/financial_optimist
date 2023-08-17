@@ -25,15 +25,15 @@ export default function AddData({
   year,
   reload,
 }) {
-  console.log(month);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState(null);
   const [openDate, setOpenDate] = useState(false);
   const [date, setDate] = useState(null);
-  const [dateMonth, setDateMonth] = useState(null);
+  // const [dateMonth, setDateMonth] = useState(null);
   const [dateYear, setDateYear] = useState(null);
-  const [dateTimestamp, setDateTimestamp] = useState(null);
+  // const [dateTimestamp, setDateTimestamp] = useState(null);
   const [minimumDate, setMinimumDate] = useState(null);
+  const [maximumDate, setMaximumDate] = useState(null);
   const [current, setCurrent] = useState(null);
   const [openType, setOpenType] = useState(false);
   const [typeValue, setTypeValue] = useState(null);
@@ -46,24 +46,33 @@ export default function AddData({
   const db = FIRESTORE_DB;
 
   useEffect(() => {
-    let minimum = new Date();
-    minimum.setDate(1);
+    if (month < 10) {
+      month = `0` + month;
+    }
+    month = parseInt(month);
+
+    let minimum = new Date(year, month - 1, 1);
+    let maximum = new Date(year, month, 1);
+    maximum.setDate(0);
     let minimumString = minimum.toLocaleDateString();
+    let maximumString = maximum.toLocaleDateString();
     let [minimumMonth, minimumDay, minimumYear] = minimumString.split("/");
+    let [maximumMonth, maximumDay, maximumYear] = maximumString.split("/");
 
     if (minimumMonth.length < 2) {
       minimumMonth = `0` + minimumMonth;
+    }
+
+    if (maximumMonth.length < 1) {
+      maximumMonth = `0` + maximumMonth;
     }
 
     if (minimumDay.length < 2) {
       minimumDay = `0` + minimumDay;
     }
 
-    if (month.length < 2) {
-      month = `0` + month;
-    }
-
     setMinimumDate(`${minimumYear}/${minimumMonth}/${minimumDay}`);
+    setMaximumDate(`${maximumYear}/${maximumMonth}/${maximumDay}`);
     setCurrent(`${year}/${month}/${minimumDay}`);
   }, [month, year]);
 
@@ -121,9 +130,9 @@ export default function AddData({
     let formattedDate = `${itemDate}, ${monthName} ${dayOfMonth}, ${yearString}`;
 
     setDate(formattedDate);
-    setDateMonth(monthName);
+    // setDateMonth(monthName);
     setDateYear(yearString);
-    setDateTimestamp(new Date(year, month - 1, day));
+    // setDateTimestamp(new Date(year, month - 1, day));
   }, []);
 
   function handleSwitch() {
@@ -279,6 +288,7 @@ export default function AddData({
                       mode="calendar"
                       minimumDate={minimumDate}
                       current={current}
+                      maximumDate={maximumDate}
                       onSelectedChange={handleDateChange}
                     />
                     <Pressable onPress={handleDateSelector}>
