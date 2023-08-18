@@ -31,7 +31,7 @@ export default function AddData({
   const [date, setDate] = useState(null);
   // const [dateMonth, setDateMonth] = useState(null);
   const [dateYear, setDateYear] = useState(null);
-  // const [dateTimestamp, setDateTimestamp] = useState(null);
+  const [dateTimestamp, setDateTimestamp] = useState(null);
   const [minimumDate, setMinimumDate] = useState(null);
   const [maximumDate, setMaximumDate] = useState(null);
   const [current, setCurrent] = useState(null);
@@ -132,7 +132,10 @@ export default function AddData({
     setDate(formattedDate);
     // setDateMonth(monthName);
     setDateYear(yearString);
-    // setDateTimestamp(new Date(year, month - 1, day));
+    year = parseInt(year);
+    month = parseInt(month);
+    day = parseInt(day);
+    setDateTimestamp(new Date(year, month - 1, day));
   }, []);
 
   function handleSwitch() {
@@ -168,23 +171,33 @@ export default function AddData({
       return;
     }
 
-    const inputData = {
-      title: title,
-      amount: parseFloat(amount),
-      date: date,
-      // month: dateMonth,
-      // year: dateYear,
-      recurring: isRecurring,
-      confirmed: false,
-      // dateTimestamp: Timestamp.fromDate(dateTimestamp),
-    };
+    // const inputData = {
+    //   title: title,
+    //   amount: parseFloat(amount),
+    //   date: date,
+    //   // month: dateMonth,
+    //   // year: dateYear,
+    //   recurring: isRecurring,
+    //   confirmed: false,
+    //   dateTimestamp: Timestamp.fromDate(dateTimestamp),
+    // };
 
     if (typeValue === "Income") {
       try {
         setLoading(true);
         let docRef = doc(db, "users", userId, `${dateYear}`, monthId);
-        let colRef = collection(docRef, "incomes");
-        await addDoc(colRef, inputData);
+        let colRef = collection(docRef, "items");
+        await addDoc(colRef, {
+          title: title,
+          amount: parseFloat(amount),
+          date: date,
+          // month: dateMonth,
+          // year: dateYear,
+          recurring: isRecurring,
+          confirmed: false,
+          type: "income",
+          dateTimestamp: Timestamp.fromDate(dateTimestamp),
+        });
         close();
         reload();
       } catch (error) {
@@ -197,8 +210,18 @@ export default function AddData({
       try {
         setLoading(true);
         let docRef = doc(db, "users", userId, `${dateYear}`, monthId);
-        let colRef = collection(docRef, "expenses");
-        await addDoc(colRef, inputData);
+        let colRef = collection(docRef, "items");
+        await addDoc(colRef, {
+          title: title,
+          amount: parseFloat(amount),
+          date: date,
+          // month: dateMonth,
+          // year: dateYear,
+          recurring: isRecurring,
+          confirmed: false,
+          type: "expense",
+          dateTimestamp: Timestamp.fromDate(dateTimestamp),
+        });
         close();
         reload();
       } catch (error) {

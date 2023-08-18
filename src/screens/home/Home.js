@@ -142,7 +142,7 @@ export default function Home() {
               {`${selectedMonth.data.month} Total`}
             </Text>
             <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-              {`$ ${currentBudget}`}
+              {`$ ${parseFloat(currentBudget).toFixed(2)}`}
             </Text>
           </View>
           <View style={styles.yearBar}>

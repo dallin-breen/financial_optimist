@@ -19,6 +19,7 @@ import {
   query,
   deleteDoc,
   updateDoc,
+  orderBy,
 } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
@@ -28,7 +29,7 @@ export default function MonthData({ userId, monthId, month, year }) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  const [income, setIncome] = useState({});
+  const [items, setItems] = useState({});
   const [expense, setExpense] = useState({});
 
   const [canAdd, setCanAdd] = useState(true);
@@ -37,52 +38,26 @@ export default function MonthData({ userId, monthId, month, year }) {
   const db = FIRESTORE_DB;
 
   useEffect(() => {
-    async function getIncomeDataFirestore() {
+    async function getIncomeExpenseDataFirestore() {
       try {
         let q = query(
-          collection(db, "users", userId, `${selectedYear}`, monthId, "incomes")
+          collection(db, "users", userId, `${selectedYear}`, monthId, "items"),
+          orderBy("dateTimestamp")
         );
-        const incomeSnapshot = await getDocs(q);
+        const itemSnapshot = await getDocs(q);
 
-        const newIncome = {};
+        const newItems = {};
 
-        incomeSnapshot.forEach((doc) => {
-          const incomeData = doc.data();
-          newIncome[doc.id] = incomeData;
+        itemSnapshot.forEach((doc) => {
+          const itemData = doc.data();
+          newItems[doc.id] = itemData;
         });
-        setIncome(newIncome);
+        setItems(newItems);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
-
-    async function getExpenseDataFirestore() {
-      try {
-        let q = query(
-          collection(
-            db,
-            "users",
-            userId,
-            `${selectedYear}`,
-            monthId,
-            "expenses"
-          )
-        );
-        const expenseSnapshot = await getDocs(q);
-
-        const newExpense = {};
-
-        expenseSnapshot.forEach((doc) => {
-          const expenseData = doc.data();
-          newExpense[doc.id] = expenseData;
-        });
-        setExpense(newExpense);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-    getIncomeDataFirestore();
-    getExpenseDataFirestore();
+    getIncomeExpenseDataFirestore();
 
     if (selectedMonth < currentMonth && selectedYear <= currentYear) {
       setCanAdd(false);
@@ -94,7 +69,7 @@ export default function MonthData({ userId, monthId, month, year }) {
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
-      async function getIncomeDataFirestore() {
+      async function getIncomeExpenseDataFirestore() {
         try {
           let q = query(
             collection(
@@ -103,50 +78,24 @@ export default function MonthData({ userId, monthId, month, year }) {
               userId,
               `${selectedYear}`,
               monthId,
-              "incomes"
-            )
+              "items"
+            ),
+            orderBy("dateTimestamp")
           );
-          const incomeSnapshot = await getDocs(q);
+          const itemSnapshot = await getDocs(q);
 
-          const newIncome = {};
+          const newItems = {};
 
-          incomeSnapshot.forEach((doc) => {
-            const incomeData = doc.data();
-            newIncome[doc.id] = incomeData;
+          itemSnapshot.forEach((doc) => {
+            const itemData = doc.data();
+            newItems[doc.id] = itemData;
           });
-          setIncome(newIncome);
+          setItems(newItems);
         } catch (error) {
           console.error("Error fetching data:", error);
         }
       }
-
-      async function getExpenseDataFirestore() {
-        try {
-          let q = query(
-            collection(
-              db,
-              "users",
-              userId,
-              `${selectedYear}`,
-              monthId,
-              "expenses"
-            )
-          );
-          const expenseSnapshot = await getDocs(q);
-
-          const newExpense = {};
-
-          expenseSnapshot.forEach((doc) => {
-            const expenseData = doc.data();
-            newExpense[doc.id] = expenseData;
-          });
-          setExpense(newExpense);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      }
-      getIncomeDataFirestore();
-      getExpenseDataFirestore();
+      getIncomeExpenseDataFirestore();
       setRefreshing(false);
     }, 5000);
   }, [month, year]);
@@ -180,157 +129,76 @@ export default function MonthData({ userId, monthId, month, year }) {
   }
 
   function reloadOnDataAdd() {
-    async function getIncomeDataFirestore() {
+    async function getIncomeExpenseDataFirestore() {
       try {
         let q = query(
-          collection(db, "users", userId, `${selectedYear}`, monthId, "incomes")
+          collection(db, "users", userId, `${selectedYear}`, monthId, "items"),
+          orderBy("dateTimestamp")
         );
-        const incomeSnapshot = await getDocs(q);
+        const itemSnapshot = await getDocs(q);
 
-        const newIncome = {};
+        const newItems = {};
 
-        incomeSnapshot.forEach((doc) => {
-          const incomeData = doc.data();
-          newIncome[doc.id] = incomeData;
+        itemSnapshot.forEach((doc) => {
+          const itemData = doc.data();
+          newItems[doc.id] = itemData;
         });
-        setIncome(newIncome);
+        setItems(newItems);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
-
-    async function getExpenseDataFirestore() {
-      try {
-        let q = query(
-          collection(
-            db,
-            "users",
-            userId,
-            `${selectedYear}`,
-            monthId,
-            "expenses"
-          )
-        );
-        const expenseSnapshot = await getDocs(q);
-
-        const newExpense = {};
-
-        expenseSnapshot.forEach((doc) => {
-          const expenseData = doc.data();
-          newExpense[doc.id] = expenseData;
-        });
-        setExpense(newExpense);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-    getIncomeDataFirestore();
-    getExpenseDataFirestore();
+    getIncomeExpenseDataFirestore();
   }
 
-  async function handleDelete(itemType, docId) {
-    if (itemType === "incomes") {
-      try {
-        let docReference = doc(
-          db,
-          "users",
-          userId,
-          `${selectedYear}`,
-          monthId,
-          itemType,
-          docId
-        );
-        const documentSnapshot = await getDoc(docReference);
-        if (documentSnapshot.exists()) {
-          await deleteDoc(docReference);
-          setIncome((prevIncome) => {
-            let newIncome = { ...prevIncome };
-            delete newIncome[docId];
-            return newIncome;
-          });
-        }
-      } catch (error) {
-        Alert.alert("Error", `${error}`);
-        return;
+  async function handleDelete(docId) {
+    try {
+      let docReference = doc(
+        db,
+        "users",
+        userId,
+        `${selectedYear}`,
+        monthId,
+        "items",
+        docId
+      );
+      const documentSnapshot = await getDoc(docReference);
+      if (documentSnapshot.exists()) {
+        await deleteDoc(docReference);
+        setItems((prevItem) => {
+          let newItems = { ...prevItem };
+          delete newItems[docId];
+          return newItems;
+        });
       }
-    }
-
-    if (itemType === "expenses") {
-      try {
-        let docReference = doc(
-          db,
-          "users",
-          userId,
-          `${selectedYear}`,
-          monthId,
-          itemType,
-          docId
-        );
-        const documentSnapshot = await getDoc(docReference);
-        if (documentSnapshot.exists()) {
-          await deleteDoc(docReference);
-          setExpense((prevExpense) => {
-            let newExpense = { ...prevExpense };
-            delete newExpense[docId];
-            return newExpense;
-          });
-        }
-      } catch (error) {
-        Alert.alert("Error", `${error}`);
-        return;
-      }
+    } catch (error) {
+      Alert.alert("Error", `${error}`);
+      return;
     }
   }
 
-  async function handleConfirmation(itemType, docId) {
-    if (itemType === "incomes") {
-      try {
-        let docReference = doc(
-          db,
-          "users",
-          userId,
-          `${selectedYear}`,
-          monthId,
-          itemType,
-          docId
-        );
-        await updateDoc(docReference, {
-          confirmed: true,
-        });
-        setIncome((prevIncome) => {
-          let newIncome = { ...prevIncome };
-          newIncome[docId]["confirmed"] = true;
-          return newIncome;
-        });
-      } catch (error) {
-        Alert.alert("Error", `${error}`);
-        return;
-      }
-    }
-
-    if (itemType === "expenses") {
-      try {
-        let docReference = doc(
-          db,
-          "users",
-          userId,
-          `${selectedYear}`,
-          monthId,
-          itemType,
-          docId
-        );
-        await updateDoc(docReference, {
-          confirmed: true,
-        });
-        setExpense((prevExpense) => {
-          let newExpense = { ...prevExpense };
-          newExpense[docId]["confirmed"] = true;
-          return newExpense;
-        });
-      } catch (error) {
-        Alert.alert("Error", `${error}`);
-        return;
-      }
+  async function handleConfirmation(docId) {
+    try {
+      let docReference = doc(
+        db,
+        "users",
+        userId,
+        `${selectedYear}`,
+        monthId,
+        "items",
+        docId
+      );
+      await updateDoc(docReference, {
+        confirmed: true,
+      });
+      setItems((prevItem) => {
+        let newItems = { ...prevItem };
+        newItems[docId]["confirmed"] = true;
+        return newItems;
+      });
+    } catch (error) {
+      Alert.alert("Error", `${error}`);
+      return;
     }
   }
 
@@ -365,7 +233,7 @@ export default function MonthData({ userId, monthId, month, year }) {
         }
         showsVerticalScrollIndicator={false}
       >
-        {Object.keys(income).length > 0 && (
+        {Object.keys(items).length > 0 && (
           <View style={styles.typeName}>
             <Text
               style={{
@@ -374,122 +242,139 @@ export default function MonthData({ userId, monthId, month, year }) {
                 fontWeight: "bold",
               }}
             >
-              Incomes
+              Incomes and Expenses
             </Text>
           </View>
         )}
 
-        {Object.keys(income).map((incomeId) => {
-          const incomeData = income[incomeId];
-          return (
-            <View key={incomeId} style={styles.item}>
-              <View style={styles.itemDate}>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    color: "white",
-                    fontWeight: "bold",
-                    alignSelf: "center",
-                  }}
-                >
-                  {incomeData.date}
-                </Text>
-                <Entypo
-                  name="circle-with-minus"
-                  size={24}
-                  color={"black"}
-                  onPress={() => handleDelete("incomes", incomeId)}
-                />
-              </View>
-              <View style={styles.itemLabels}>
-                <Text style={styles.columnOne}>Title</Text>
-                <Text style={styles.columnTwo}>Amount</Text>
-                <Text style={styles.columnThree}>Total</Text>
-              </View>
-              <Pressable
-                onPress={() => handleConfirmation("incomes", incomeId)}
-              >
-                <View
-                  style={[
-                    styles.itemInfo,
-                    incomeData.confirmed && styles.confirmedIncome,
-                  ]}
-                >
-                  <Text style={styles.columnOne}>{incomeData.title}</Text>
-                  <Text style={styles.columnTwo}>{incomeData.amount}</Text>
+        {Object.keys(items).map((itemId) => {
+          const itemData = items[itemId];
+          if (itemData.type === "expense") {
+            if (!itemData.recurring) {
+              return (
+                <View key={itemId} style={styles.item}>
+                  <View style={styles.itemDate}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        color: "white",
+                        fontWeight: "bold",
+                        alignSelf: "center",
+                      }}
+                    >
+                      {itemData.date}
+                    </Text>
+                    <Entypo
+                      name="circle-with-minus"
+                      size={24}
+                      color={"black"}
+                      onPress={() => handleDelete(itemId)}
+                    />
+                  </View>
+                  <View style={styles.itemLabels}>
+                    <Text style={styles.columnOne}>Title</Text>
+                    <Text style={styles.columnTwo}>Amount</Text>
+                    {/* <Text style={styles.columnThree}>Total</Text> */}
+                  </View>
+                  <Pressable onPress={() => handleConfirmation(itemId)}>
+                    <View
+                      style={[
+                        styles.itemInfo,
+                        itemData.confirmed && styles.confirmedItem,
+                      ]}
+                    >
+                      <Text style={styles.columnOne}>{itemData.title}</Text>
+                      <Text style={styles.columnTwo}>
+                        {`$ ${parseFloat(itemData.amount).toFixed(2)}`}
+                      </Text>
+                    </View>
+                  </Pressable>
                 </View>
-              </Pressable>
-            </View>
-          );
-        })}
-        {Object.keys(expense).length > 0 && (
-          <View style={styles.typeName}>
-            <Text
-              style={{
-                fontSize: 22,
-                color: "black",
-                fontWeight: "bold",
-              }}
-            >
-              Expenses
-            </Text>
-          </View>
-        )}
-        {Object.keys(expense).map((expenseId) => {
-          const expenseData = expense[expenseId];
-          return (
-            <View key={expenseId} style={styles.item}>
-              <View style={styles.itemDate}>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    color: "white",
-                    fontWeight: "bold",
-                    alignSelf: "center",
-                  }}
-                >
-                  {expenseData.date}
-                </Text>
-                <Entypo
-                  name="circle-with-minus"
-                  size={24}
-                  color={"black"}
-                  onPress={() => handleDelete("expenses", expenseId)}
-                />
-              </View>
-              <View style={styles.itemLabels}>
-                <Text style={styles.columnOne}>Title</Text>
-                <Text style={styles.columnTwo}>Amount</Text>
-                <Text style={styles.columnThree}>Total</Text>
-              </View>
-              <Pressable
-                onPress={() => handleConfirmation("expenses", expenseId)}
-              >
-                {expenseData.recurring === false ? (
+              );
+            } else {
+              return (
+                <View key={itemId} style={styles.item}>
+                  <View style={styles.itemDate}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        color: "white",
+                        fontWeight: "bold",
+                        alignSelf: "center",
+                      }}
+                    >
+                      {itemData.date}
+                    </Text>
+                    <Entypo
+                      name="circle-with-minus"
+                      size={24}
+                      color={"black"}
+                      onPress={() => handleDelete(itemId)}
+                    />
+                  </View>
+                  <View style={styles.itemLabels}>
+                    <Text style={styles.columnOne}>Title</Text>
+                    <Text style={styles.columnTwo}>Amount</Text>
+                    {/* <Text style={styles.columnThree}>Total</Text> */}
+                  </View>
+                  <Pressable onPress={() => handleConfirmation(itemId)}>
+                    <View
+                      style={[
+                        styles.itemInfo,
+                        itemData.confirmed && styles.confirmedExpense,
+                      ]}
+                    >
+                      <Text style={styles.columnOne}>{itemData.title}</Text>
+                      <Text style={styles.columnTwo}>
+                        {`$ ${parseFloat(itemData.amount).toFixed(2)}`}
+                      </Text>
+                    </View>
+                  </Pressable>
+                </View>
+              );
+            }
+          } else {
+            return (
+              <View key={itemId} style={styles.item}>
+                <View style={styles.itemDate}>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      color: "white",
+                      fontWeight: "bold",
+                      alignSelf: "center",
+                    }}
+                  >
+                    {itemData.date}
+                  </Text>
+                  <Entypo
+                    name="circle-with-minus"
+                    size={24}
+                    color={"black"}
+                    onPress={() => handleDelete(itemId)}
+                  />
+                </View>
+                <View style={styles.itemLabels}>
+                  <Text style={styles.columnOne}>Title</Text>
+                  <Text style={styles.columnTwo}>Amount</Text>
+                  {/* <Text style={styles.columnThree}>Total</Text> */}
+                </View>
+                <Pressable onPress={() => handleConfirmation(itemId)}>
                   <View
                     style={[
                       styles.itemInfo,
-                      expenseData.confirmed && styles.confirmedItem,
+                      itemData.confirmed && styles.confirmedIncome,
                     ]}
                   >
-                    <Text style={styles.columnOne}>{expenseData.title}</Text>
-                    <Text style={styles.columnTwo}>{expenseData.amount}</Text>
-                    <Text style={styles.columnThree}>4000</Text>
+                    <Text style={styles.columnOne}>{itemData.title}</Text>
+                    <Text style={styles.columnTwo}>
+                      {`$ ${parseFloat(itemData.amount).toFixed(2)}`}
+                    </Text>
                   </View>
-                ) : (
-                  <View
-                    style={[
-                      styles.itemInfo,
-                      expenseData.confirmed && styles.confirmedExpense,
-                    ]}
-                  >
-                    <Text style={styles.columnOne}>{expenseData.title}</Text>
-                    <Text style={styles.columnTwo}>{expenseData.amount}</Text>
-                  </View>
-                )}
-              </Pressable>
-            </View>
-          );
+                </Pressable>
+              </View>
+            );
+          }
         })}
       </ScrollView>
       {modalIsOpen ? (
@@ -564,21 +449,21 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
   },
   columnOne: {
-    width: "60%",
+    width: "80%",
   },
   columnTwo: {
     width: "20%",
   },
-  columnThree: {
-    width: "20%",
-  },
+  // columnThree: {
+  //   width: "20%",
+  // },
   confirmedItem: {
-    backgroundColor: "yellow",
+    backgroundColor: "#bebf63",
   },
   confirmedExpense: {
-    backgroundColor: "red",
+    backgroundColor: "#bf6363",
   },
   confirmedIncome: {
-    backgroundColor: "green",
+    backgroundColor: "#71bf63",
   },
 });
