@@ -108,6 +108,10 @@ export default function Home() {
     return;
   }
 
+  function showBudgetChange(budget) {
+    setCurrentBudget(budget);
+  }
+
   return (
     <KeyboardAvoidingView style={styles.container}>
       {!hasCurrentYear ? null : !selectedMonth ? null : (
@@ -198,6 +202,8 @@ export default function Home() {
           </View>
           {selectedMonth ? (
             <MonthData
+              currentBudget={currentBudget}
+              showBudgetChange={showBudgetChange}
               userId={auth.currentUser.uid}
               monthId={selectedMonth.id}
               month={selectedMonth.data.month}

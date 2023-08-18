@@ -13,10 +13,18 @@ import {
 } from "react-native";
 import DatePicker from "react-native-modern-datepicker";
 import DropDownPicker from "react-native-dropdown-picker";
-import { doc, addDoc, collection, Timestamp } from "firebase/firestore";
+import {
+  doc,
+  addDoc,
+  collection,
+  Timestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
 export default function AddData({
+  currentBudget,
+  setBudgetChange,
   userId,
   monthId,
   visible,
@@ -185,6 +193,12 @@ export default function AddData({
     if (typeValue === "Income") {
       try {
         setLoading(true);
+        let docReference = doc(db, "users", userId, `${year}`, monthId);
+        let newBudget = currentBudget + parseFloat(amount);
+        await updateDoc(docReference, {
+          budget: newBudget,
+        });
+        setBudgetChange(newBudget);
         let docRef = doc(db, "users", userId, `${dateYear}`, monthId);
         let colRef = collection(docRef, "items");
         await addDoc(colRef, {
@@ -209,6 +223,12 @@ export default function AddData({
     } else {
       try {
         setLoading(true);
+        let docReference = doc(db, "users", userId, `${year}`, monthId);
+        let newBudget = currentBudget - parseFloat(amount);
+        await updateDoc(docReference, {
+          budget: newBudget,
+        });
+        setBudgetChange(newBudget);
         let docRef = doc(db, "users", userId, `${dateYear}`, monthId);
         let colRef = collection(docRef, "items");
         await addDoc(colRef, {

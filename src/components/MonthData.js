@@ -23,14 +23,20 @@ import {
 } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../firebase";
 
-export default function MonthData({ userId, monthId, month, year }) {
+export default function MonthData({
+  currentBudget,
+  showBudgetChange,
+  userId,
+  monthId,
+  month,
+  year,
+}) {
   const selectedMonth = convertMonthToInt(month);
   const selectedYear = year;
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
   const [items, setItems] = useState({});
-  const [expense, setExpense] = useState({});
 
   const [canAdd, setCanAdd] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -151,7 +157,30 @@ export default function MonthData({ userId, monthId, month, year }) {
     getIncomeExpenseDataFirestore();
   }
 
-  async function handleDelete(docId) {
+  async function handleDelete(docId, type, amount) {
+    if (type === "income") {
+      try {
+        let docReference = doc(db, "users", userId, `${year}`, monthId);
+        let newBudget = currentBudget - parseFloat(amount);
+        await updateDoc(docReference, {
+          budget: newBudget,
+        });
+        setBudgetChange(newBudget);
+      } catch (error) {
+        console.error("Error updating doc:", error);
+      }
+    } else {
+      try {
+        let docReference = doc(db, "users", userId, `${year}`, monthId);
+        let newBudget = currentBudget + parseFloat(amount);
+        await updateDoc(docReference, {
+          budget: newBudget,
+        });
+        setBudgetChange(newBudget);
+      } catch (error) {
+        console.error("Error updating doc:", error);
+      }
+    }
     try {
       let docReference = doc(
         db,
@@ -200,6 +229,10 @@ export default function MonthData({ userId, monthId, month, year }) {
       Alert.alert("Error", `${error}`);
       return;
     }
+  }
+
+  function setBudgetChange(budget) {
+    showBudgetChange(budget);
   }
 
   return (
@@ -268,7 +301,9 @@ export default function MonthData({ userId, monthId, month, year }) {
                       name="circle-with-minus"
                       size={24}
                       color={"black"}
-                      onPress={() => handleDelete(itemId)}
+                      onPress={() =>
+                        handleDelete(itemId, itemData.type, itemData.amount)
+                      }
                     />
                   </View>
                   <View style={styles.itemLabels}>
@@ -309,7 +344,9 @@ export default function MonthData({ userId, monthId, month, year }) {
                       name="circle-with-minus"
                       size={24}
                       color={"black"}
-                      onPress={() => handleDelete(itemId)}
+                      onPress={() =>
+                        handleDelete(itemId, itemData.type, itemData.amount)
+                      }
                     />
                   </View>
                   <View style={styles.itemLabels}>
@@ -351,7 +388,9 @@ export default function MonthData({ userId, monthId, month, year }) {
                     name="circle-with-minus"
                     size={24}
                     color={"black"}
-                    onPress={() => handleDelete(itemId)}
+                    onPress={() =>
+                      handleDelete(itemId, itemData.type, itemData.amount)
+                    }
                   />
                 </View>
                 <View style={styles.itemLabels}>
@@ -379,6 +418,8 @@ export default function MonthData({ userId, monthId, month, year }) {
       </ScrollView>
       {modalIsOpen ? (
         <AddData
+          currentBudget={currentBudget}
+          setBudgetChange={setBudgetChange}
           userId={userId}
           monthId={monthId}
           visible={modalIsOpen}
