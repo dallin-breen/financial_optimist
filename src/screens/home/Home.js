@@ -26,10 +26,19 @@ const db = FIRESTORE_DB;
 
 export default function Home() {
   const [hasCurrentYear, setHasCurrentYear] = useState(null);
-  const [currentYear, setCurrentYear] = useState(null);
+  const [currentYear, setCurrentYear] = useState({
+    year: new Date().getFullYear(),
+    direction: "current",
+  });
   const [currentUser, setCurrentUser] = useState(null);
   const [currentBudget, setCurrentBudget] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState({
+    data: {
+      budget: 0,
+      month: new Date().getMonth(),
+    },
+    id: "0",
+  });
   const months = [
     { id: 1, name: "January" },
     { id: 2, name: "February" },
@@ -46,46 +55,69 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    setCurrentYear(year);
-    const month = new Date().getMonth();
+    if (currentUser === null) {
+      async function getCurrentUser() {
+        const docRef = doc(db, "users", auth.currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        setCurrentUser(docSnap.data().name);
+      }
+      getCurrentUser();
+    }
 
-    async function getUserInfo() {
-      const docRef = doc(db, "users", auth.currentUser.uid);
-      const docSnap = await getDoc(docRef);
-      setCurrentUser(docSnap.data().name);
-
+    async function getYearData() {
       const colSnap = await getDocs(
-        collection(db, "users", auth.currentUser.uid, `${year}`)
+        collection(db, "users", auth.currentUser.uid, `${currentYear.year}`)
       );
 
       if (colSnap.size > 0) {
         setHasCurrentYear(true);
-        let q = query(
-          collection(db, "users", auth.currentUser.uid, `${year}`),
-          where("month", "==", months[month].name)
-        );
-
-        let querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          let monthData = { id: doc.id, data: doc.data() };
-          setSelectedMonth(monthData);
-          setCurrentBudget(monthData.data.budget);
-        });
+        if (typeof selectedMonth.data.month === "number") {
+          let q = query(
+            collection(
+              db,
+              "users",
+              auth.currentUser.uid,
+              `${currentYear.year}`
+            ),
+            where("month", "==", months[selectedMonth.data.month].name)
+          );
+          let querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            let monthData = { id: doc.id, data: doc.data() };
+            setSelectedMonth(monthData);
+            setCurrentBudget(monthData.data.budget);
+          });
+        } else {
+          let q = query(
+            collection(
+              db,
+              "users",
+              auth.currentUser.uid,
+              `${currentYear.year}`
+            ),
+            where("month", "==", selectedMonth.data.month)
+          );
+          let querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            let monthData = { id: doc.id, data: doc.data() };
+            setSelectedMonth(monthData);
+            setCurrentBudget(monthData.data.budget);
+          });
+        }
       } else {
         setHasCurrentYear(false);
       }
     }
 
-    getUserInfo();
-  }, []);
+    getYearData();
+  }, [currentYear]);
 
   async function handleMonthSelection(month) {
     if (selectedMonth.data.month === month) {
       return;
     } else {
       let q = query(
-        collection(db, "users", auth.currentUser.uid, `${currentYear}`),
+        collection(db, "users", auth.currentUser.uid, `${currentYear.year}`),
         where("month", "==", month)
       );
 
@@ -98,14 +130,37 @@ export default function Home() {
     }
   }
 
-  function handlePrevYear() {
-    Alert.alert("Selected Previous Year");
-    return;
+  async function handlePrevYear() {
+    const columnSnap = await getDocs(
+      collection(db, "users", auth.currentUser.uid, `${currentYear.year - 1}`)
+    );
+    if (columnSnap.size > 0) {
+      setCurrentYear((prevYear) => ({
+        year: prevYear.year - 1,
+        direction: "previous",
+      }));
+    } else {
+      Alert.alert("You have no data for the previous year");
+      return;
+    }
   }
 
-  function handleNextYear() {
-    Alert.alert("Selected Next Year");
-    return;
+  async function handleNextYear() {
+    const columnSnap = await getDocs(
+      collection(db, "users", auth.currentUser.uid, `${currentYear.year + 1}`)
+    );
+    if (columnSnap.size > 0) {
+      setCurrentYear((prevYear) => ({
+        year: prevYear.year + 1,
+        direction: "next",
+      }));
+    } else {
+      Alert.alert(
+        "You have no data for the next year",
+        "You can add data to next year in October"
+      );
+      return;
+    }
   }
 
   function showBudgetChange(budget) {
@@ -114,7 +169,7 @@ export default function Home() {
 
   return (
     <KeyboardAvoidingView style={styles.container}>
-      {!hasCurrentYear ? null : !selectedMonth ? null : (
+      {!hasCurrentYear ? null : (
         <View style={styles.main}>
           <View style={styles.nameBar}>
             <View>
@@ -159,7 +214,7 @@ export default function Home() {
               />
             </View>
             <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>
-              {currentYear}
+              {currentYear.year}
             </Text>
             <View>
               <Entypo
@@ -200,14 +255,22 @@ export default function Home() {
               ))}
             </ScrollView>
           </View>
-          {selectedMonth ? (
+          <MonthData
+            currentBudget={currentBudget}
+            showBudgetChange={showBudgetChange}
+            userId={auth.currentUser.uid}
+            monthId={selectedMonth.id}
+            month={selectedMonth.data.month}
+            year={currentYear.year}
+          />
+          {/* {selectedMonth ? (
             <MonthData
               currentBudget={currentBudget}
               showBudgetChange={showBudgetChange}
               userId={auth.currentUser.uid}
               monthId={selectedMonth.id}
               month={selectedMonth.data.month}
-              year={currentYear}
+              year={currentYear.year}
             />
           ) : (
             <View style={styles.instructions}>
@@ -217,7 +280,7 @@ export default function Home() {
                 Select the month you want to view
               </Text>
             </View>
-          )}
+          )} */}
         </View>
       )}
     </KeyboardAvoidingView>

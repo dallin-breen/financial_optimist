@@ -65,12 +65,16 @@ export default function MonthData({
     }
     getIncomeExpenseDataFirestore();
 
-    if (selectedMonth < currentMonth && selectedYear <= currentYear) {
+    if (selectedYear < currentYear) {
+      setCanAdd(false);
+    } else if (selectedYear > currentYear) {
+      setCanAdd(true);
+    } else if (selectedMonth < currentMonth) {
       setCanAdd(false);
     } else {
       setCanAdd(true);
     }
-  }, [selectedMonth, currentMonth, selectedYear]);
+  }, [selectedMonth, currentMonth, selectedYear, monthId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
