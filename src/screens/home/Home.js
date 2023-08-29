@@ -17,6 +17,7 @@ import {
   getDocs,
   query,
   where,
+  addDoc,
 } from "firebase/firestore";
 import MonthData from "../../components/MonthData";
 // import { useNavigation, useRoute } from "@react-navigation/native";
@@ -110,6 +111,52 @@ export default function Home() {
     }
 
     getYearData();
+
+    async function loadNextYearsData() {
+      if (months[new Date().getMonth()].name === "October") {
+        let colSnap = await getDocs(
+          collection(
+            db,
+            "users",
+            auth.currentUser.uid,
+            `${currentYear.year + 1}`
+          )
+        );
+
+        if (colSnap.size > 0) {
+          return;
+        } else {
+          let currentDaysYear = new Date().getFullYear();
+          if (currentYear.year + 1 - currentDaysYear === 1) {
+            let lastMonthData = {};
+            let q = query(
+              collection(
+                db,
+                "users",
+                auth.currentUser.uid,
+                `${currentYear.year}`
+              ),
+              where("month", "==", "December")
+            );
+            let querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+              lastMonthData = { id: doc.id, data: doc.data() };
+            });
+            let docSnap = doc(db, "users", auth.currentUser.uid);
+            let colRef = collection(docSnap, `${currentYear.year + 1}`);
+
+            for (let i = 0; i < months.length; i++) {
+              await addDoc(colRef, {
+                month: months[i].name,
+                budget: parseFloat(lastMonthData.data.budget),
+              });
+            }
+          }
+        }
+      }
+    }
+
+    loadNextYearsData();
   }, [currentYear]);
 
   async function handleMonthSelection(month) {
@@ -157,7 +204,7 @@ export default function Home() {
     } else {
       Alert.alert(
         "You have no data for the next year",
-        "You can add data to next year in October"
+        "The next years calendar will be generated in October"
       );
       return;
     }
