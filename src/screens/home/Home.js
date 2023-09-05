@@ -147,6 +147,7 @@ export default function Home() {
 
             for (let i = 0; i < months.length; i++) {
               await addDoc(colRef, {
+                number: i + 1,
                 month: months[i].name,
                 budget: parseFloat(lastMonthData.data.budget),
               });
