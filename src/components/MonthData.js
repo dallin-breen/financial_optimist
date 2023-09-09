@@ -31,7 +31,8 @@ export default function MonthData({
   month,
   year,
 }) {
-  const selectedMonth = convertMonthToInt(month);
+  const selectedMonth =
+    typeof month === "number" ? month + 1 : convertMonthToInt(month);
   const selectedYear = year;
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -162,25 +163,131 @@ export default function MonthData({
   }
 
   async function handleDelete(docId, type, amount) {
+    let monthsToBeModified = {};
+    let nextYearsMonthsToBeModified = {};
+
+    try {
+      let q = query(
+        collection(db, "users", userId, `${selectedYear}`),
+        where("number", ">=", selectedMonth)
+      );
+      let querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        monthsToBeModified[doc.id] = doc.data();
+      });
+
+      if (
+        selectedMonth === 10 ||
+        selectedMonth === 11 ||
+        selectedMonth === 12
+      ) {
+        try {
+          let q = query(collection(db, "users", userId, `${selectedYear + 1}`));
+          let querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            nextYearsMonthsToBeModified[doc.id] = doc.data();
+          });
+        } catch (error) {
+          console.error("Error with operation:", error);
+        }
+      }
+    } catch (error) {
+      console.error("Error with operation:", error);
+    }
+
     if (type === "income") {
       try {
-        let docReference = doc(db, "users", userId, `${year}`, monthId);
-        let newBudget = currentBudget - parseFloat(amount);
-        await updateDoc(docReference, {
-          budget: newBudget,
+        delete monthsToBeModified[monthId];
+        let currentDocReference = doc(
+          db,
+          "users",
+          userId,
+          `${selectedYear}`,
+          monthId
+        );
+        let currentNewBudget = currentBudget - parseFloat(amount);
+        await updateDoc(currentDocReference, {
+          budget: currentNewBudget,
         });
-        setBudgetChange(newBudget);
+        setBudgetChange(currentNewBudget);
+
+        for (let monthKey in monthsToBeModified) {
+          let monthOfObject = monthsToBeModified[monthKey];
+          let docReference = doc(db, "users", userId, `${year}`, monthKey);
+          let newBudget = monthOfObject.budget - parseFloat(amount);
+          await updateDoc(docReference, {
+            budget: newBudget,
+          });
+        }
+
+        if (
+          selectedMonth === 10 ||
+          selectedMonth === 11 ||
+          selectedMonth === 12
+        ) {
+          for (let monthKey in nextYearsMonthsToBeModified) {
+            let monthOfObject = nextYearsMonthsToBeModified[monthKey];
+            let docReference = doc(
+              db,
+              "users",
+              userId,
+              `${selectedYear + 1}`,
+              monthKey
+            );
+            let newBudget = monthOfObject.budget - parseFloat(amount);
+            await updateDoc(docReference, {
+              budget: newBudget,
+            });
+          }
+        }
       } catch (error) {
         console.error("Error updating doc:", error);
       }
     } else {
       try {
-        let docReference = doc(db, "users", userId, `${year}`, monthId);
-        let newBudget = currentBudget + parseFloat(amount);
-        await updateDoc(docReference, {
-          budget: newBudget,
+        delete monthsToBeModified[monthId];
+        let currentDocReference = doc(
+          db,
+          "users",
+          userId,
+          `${selectedYear}`,
+          monthId
+        );
+        let currentNewBudget = currentBudget + parseFloat(amount);
+        await updateDoc(currentDocReference, {
+          budget: currentNewBudget,
         });
-        setBudgetChange(newBudget);
+        setBudgetChange(currentNewBudget);
+
+        for (let monthKey in monthsToBeModified) {
+          let monthOfObject = monthsToBeModified[monthKey];
+          let docReference = doc(db, "users", userId, `${year}`, monthKey);
+          let newBudget = monthOfObject.budget + parseFloat(amount);
+          await updateDoc(docReference, {
+            budget: newBudget,
+          });
+        }
+
+        if (
+          selectedMonth === 10 ||
+          selectedMonth === 11 ||
+          selectedMonth === 12
+        ) {
+          for (let monthKey in nextYearsMonthsToBeModified) {
+            let monthOfObject = nextYearsMonthsToBeModified[monthKey];
+            let docReference = doc(
+              db,
+              "users",
+              userId,
+              `${selectedYear + 1}`,
+              monthKey
+            );
+            let newBudget = monthOfObject.budget + parseFloat(amount);
+            await updateDoc(docReference, {
+              budget: newBudget,
+            });
+          }
+        }
       } catch (error) {
         console.error("Error updating doc:", error);
       }
