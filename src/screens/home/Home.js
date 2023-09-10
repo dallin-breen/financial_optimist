@@ -20,6 +20,7 @@ import {
   addDoc,
 } from "firebase/firestore";
 import MonthData from "../../components/MonthData";
+import CreateYear from "../../components/CreateYear";
 // import { useNavigation, useRoute } from "@react-navigation/native";
 
 const auth = FIREBASE_AUTH;
@@ -158,7 +159,7 @@ export default function Home() {
     }
 
     loadNextYearsData();
-  }, [currentYear]);
+  }, [hasCurrentYear, currentYear]);
 
   async function handleMonthSelection(month) {
     if (selectedMonth.data.month === month) {
@@ -211,13 +212,19 @@ export default function Home() {
     }
   }
 
+  function reloadCurrentYear(yearWasCreated) {
+    setHasCurrentYear(yearWasCreated);
+  }
+
   function showBudgetChange(budget) {
     setCurrentBudget(budget);
   }
 
   return (
     <KeyboardAvoidingView style={styles.container}>
-      {!hasCurrentYear ? null : (
+      {!hasCurrentYear ? (
+        <CreateYear reloadCurrentYear={reloadCurrentYear} />
+      ) : (
         <View style={styles.main}>
           <View style={styles.nameBar}>
             <View>
@@ -226,7 +233,10 @@ export default function Home() {
                 size={24}
                 color={"#3E859A"}
                 onPress={() =>
-                  Alert.alert("Settings", "Settings were pressed!")
+                  Alert.alert(
+                    "Settings",
+                    "Settings in development. If you wish to delete account, contact: thefinancialoptimist@gmail.com"
+                  )
                 }
               />
             </View>
