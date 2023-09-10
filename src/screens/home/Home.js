@@ -21,12 +21,13 @@ import {
 } from "firebase/firestore";
 import MonthData from "../../components/MonthData";
 import CreateYear from "../../components/CreateYear";
-// import { useNavigation, useRoute } from "@react-navigation/native";
+import Settings from "../../components/Settings";
 
 const auth = FIREBASE_AUTH;
 const db = FIRESTORE_DB;
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
   const [hasCurrentYear, setHasCurrentYear] = useState(null);
   const [currentYear, setCurrentYear] = useState({
     year: new Date().getFullYear(),
@@ -34,6 +35,7 @@ export default function Home() {
   });
   const [currentUser, setCurrentUser] = useState(null);
   const [currentBudget, setCurrentBudget] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState({
     data: {
       budget: 0,
@@ -106,6 +108,7 @@ export default function Home() {
             setCurrentBudget(monthData.data.budget);
           });
         }
+        setIsLoading(false);
       } else {
         setHasCurrentYear(false);
       }
@@ -220,9 +223,17 @@ export default function Home() {
     setCurrentBudget(budget);
   }
 
+  function openModal() {
+    setSettingsOpen(true);
+  }
+
+  function closeModal() {
+    setSettingsOpen(false);
+  }
+
   return (
     <KeyboardAvoidingView style={styles.container}>
-      {!hasCurrentYear ? (
+      {isLoading ? null : !hasCurrentYear ? (
         <CreateYear reloadCurrentYear={reloadCurrentYear} />
       ) : (
         <View style={styles.main}>
@@ -232,12 +243,7 @@ export default function Home() {
                 name="cog"
                 size={24}
                 color={"#3E859A"}
-                onPress={() =>
-                  Alert.alert(
-                    "Settings",
-                    "Settings in development. If you wish to delete account, contact: thefinancialoptimist@gmail.com"
-                  )
-                }
+                onPress={openModal}
               />
             </View>
             <View>
@@ -321,24 +327,9 @@ export default function Home() {
             month={selectedMonth.data.month}
             year={currentYear.year}
           />
-          {/* {selectedMonth ? (
-            <MonthData
-              currentBudget={currentBudget}
-              showBudgetChange={showBudgetChange}
-              userId={auth.currentUser.uid}
-              monthId={selectedMonth.id}
-              month={selectedMonth.data.month}
-              year={currentYear.year}
-            />
-          ) : (
-            <View style={styles.instructions}>
-              <Text
-                style={{ fontSize: 22, fontWeight: "bold", color: "black" }}
-              >
-                Select the month you want to view
-              </Text>
-            </View>
-          )} */}
+          {settingsOpen ? (
+            <Settings visible={settingsOpen} close={closeModal} />
+          ) : null}
         </View>
       )}
     </KeyboardAvoidingView>

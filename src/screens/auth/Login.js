@@ -88,6 +88,9 @@ export default function Login() {
               source={require("../../assets/financial-optimist-logo.jpg")}
               resizeMode="cover"
             />
+            <Text style={{ marginTop: "5%", fontSize: 17, fontWeight: 600 }}>
+              Your Personal Budgeting App
+            </Text>
           </View>
           <View style={styles.form}>
             <TextInput

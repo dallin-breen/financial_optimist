@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Alert,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import AddData from "./AddData";
 import {
@@ -31,6 +32,7 @@ export default function MonthData({
   month,
   year,
 }) {
+  const [isLoading, setIsLoading] = useState(false);
   const selectedMonth =
     typeof month === "number" ? month + 1 : convertMonthToInt(month);
   const selectedYear = year;
@@ -195,6 +197,7 @@ export default function MonthData({
       console.error("Error with operation:", error);
     }
 
+    setIsLoading(true);
     if (type === "income") {
       try {
         delete monthsToBeModified[monthId];
@@ -314,6 +317,8 @@ export default function MonthData({
     } catch (error) {
       Alert.alert("Error", `${error}`);
       return;
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -344,6 +349,14 @@ export default function MonthData({
 
   function setBudgetChange(budget) {
     showBudgetChange(budget);
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#3E859A" />
+      </View>
+    );
   }
 
   return (
