@@ -82,11 +82,11 @@ export default function Login() {
               style={{
                 width: "80%",
                 height: "55%",
-                borderWidth: 2,
-                borderColor: "#747474",
+                // borderWidth: 2,
+                // borderColor: "#747474",
               }}
               source={require("../../assets/financial-optimist-logo.jpg")}
-              resizeMode="cover"
+              resizeMode="contain"
             />
             <Text style={{ marginTop: "5%", fontSize: 17, fontWeight: 600 }}>
               Your Personal Budgeting App

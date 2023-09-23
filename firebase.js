@@ -7,12 +7,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBBu4fm6GJkvoZsvMOte7HIZkby8yLxlMY",
-  authDomain: "financial-optimist-f60b2.firebaseapp.com",
-  projectId: "financial-optimist-f60b2",
-  storageBucket: "financial-optimist-f60b2.appspot.com",
-  messagingSenderId: "1059597704404",
-  appId: "1:1059597704404:web:5c1b1e37a741ab1be3ef41",
+  apiKey: "AIzaSyBfslq-J0FUi4GpRGVVkUCUPpLs8Uffhpw",
+  authDomain: "financial-optimist-b31df.firebaseapp.com",
+  projectId: "financial-optimist-b31df",
+  storageBucket: "financial-optimist-b31df.appspot.com",
+  messagingSenderId: "746070466213",
+  appId: "1:746070466213:web:bc549b08f97a0f6a55774c",
 };
 
 // Initialize Firebase
